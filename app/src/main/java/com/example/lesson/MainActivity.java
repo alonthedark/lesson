@@ -33,12 +33,15 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     Context context = this;
     Activity activity = this;
     static Handler handler;
+    int savePosition;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         handler = new Handler() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -48,43 +51,29 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
                 }
             }
         };
+
         int permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS);
 
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-            //readContact();
             ReadContactPermission readContactPermission = new ReadContactPermission(activity, context);
             readContactPermission.pemissionGranted();
         } else {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS},
                     PERMISSIONS_REQUEST_READ_CONTACTS);
-            //readContacts(context);
         }
-
-
     }
+
 
     private void startTransaction() {
         contactListFragment = new ContactListFragment();
-        fragmentManager.beginTransaction().addToBackStack(null).add(R.id.frag, contactListFragment).commit();
-    }
-
-    public void readContact() {
-
-        Runnable runnable = new Runnable() {
-            public void run() {
-                ReadContactPermission readContactPermission = new ReadContactPermission(activity, context);
-                readContactPermission.pemissionGranted();
-            }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
 
     public void setAdapter(RecyclerView recycler) {
 
         Log.d("1", "adapter");
 
-        ContactListAdapter adapter = new ContactListAdapter(this,this);
+        ContactListAdapter adapter = new ContactListAdapter(this, this);
         recycler.setAdapter(adapter);
         recycler.getAdapter().notifyDataSetChanged();
     }
@@ -93,10 +82,13 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     @Override
     public void onItemClick(int position) {
         Bundle bundle = new Bundle();
+        savePosition = position;
         bundle.putInt("position", position);
+        savePosition = position;
         contactFragment = new ContactFragment();
         contactFragment.setArguments(bundle);
-        fragmentManager.beginTransaction().replace(R.id.frag,contactFragment).addToBackStack(null).commit();
-        Log.d("CLICK", "CLICK "+position);
+        fragmentManager.beginTransaction().replace(R.id.frag, contactFragment).addToBackStack(null).commit();
+        Log.d("CLICK", "CLICK " + position);
     }
+
 }

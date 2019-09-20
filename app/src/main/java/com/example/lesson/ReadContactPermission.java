@@ -90,21 +90,35 @@ public class ReadContactPermission {
                 if (Integer.parseInt(has_phone) > 0) {
                     // extract phone number
                     Cursor pCur;
+                    Cursor emailCu;
                     pCur = context.getContentResolver().query(
-                            ContactsContract.CommonDataKinds
-                                    .Phone.CONTENT_URI,
-                            null,
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,
                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
                             new String[]{id}, null);
+
+                    emailCu = context.getContentResolver().query(
+                            ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
+                            new String[]{id}, null);
+
+
                     while(pCur.moveToNext()) {
                         String phone = pCur.getString(
                                 pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                         contact.setPhone(phone);
 
-                        String email = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                        contact.setEmail(email);
                     }
+                    while(emailCu.moveToNext()){
+                        String emailg = emailCu.getString(
+                                emailCu.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                                if (emailg != null) {
+                                contact.setEmail(emailg);
+                                }
+
+                    }
+
                     contacts.add(contact);
+                    emailCu.close();
                     pCur.close();
                 }
                 Log.d(TAG, "Contact id="  + contact.getIds()    +
@@ -119,8 +133,8 @@ public class ReadContactPermission {
             ContactDB contactDB = new ContactDB(
                     contacts.get(i).getName(),
                     contacts.get(i).getPhone(),
-                    contacts.get(i).getIds())
-                    ;
+                    contacts.get(i).getIds(),
+                    contacts.get(i).getEmail());
             contactDB.save();
         }
         MainActivity.handler.sendEmptyMessage(0);

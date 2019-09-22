@@ -21,11 +21,17 @@ public class ReadContactPermission {
     Context context;
     public List<Contact> contacts = new ArrayList<>();
     Activity activity;
+    Cursor cursor;
+    Cursor pCur;
+    Cursor emailCu;
+    MainActivity ma;
 
 
-    ReadContactPermission(Activity activity,Context context){
+
+    ReadContactPermission(Activity activity, Context context, MainActivity ma){
         this.context = context;
         this.activity = activity;
+        this.ma = ma;
         ContactDB.deleteAll(ContactDB.class);
     }
 
@@ -61,7 +67,6 @@ public class ReadContactPermission {
         else {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS},
                     PERMISSIONS_REQUEST_READ_CONTACTS);
-            //readContacts(context);
         }
 
     }
@@ -70,7 +75,7 @@ public class ReadContactPermission {
     public void readContacts(Context context)
     {
         Contact contact;
-        Cursor cursor=context.getContentResolver().query(
+        cursor=context.getContentResolver().query(
                 ContactsContract.Contacts.CONTENT_URI,
                 null, null, null, null);
 
@@ -89,8 +94,7 @@ public class ReadContactPermission {
 
                 if (Integer.parseInt(has_phone) > 0) {
                     // extract phone number
-                    Cursor pCur;
-                    Cursor emailCu;
+
                     pCur = context.getContentResolver().query(
                             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,
                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
@@ -114,12 +118,10 @@ public class ReadContactPermission {
                                 if (emailg != null) {
                                 contact.setEmail(emailg);
                                 }
-
                     }
 
                     contacts.add(contact);
-                    emailCu.close();
-                    pCur.close();
+
                 }
                 Log.d(TAG, "Contact id="  + contact.getIds()    +
                         ", name="  + contact.getName () +
@@ -128,7 +130,9 @@ public class ReadContactPermission {
                 Log.d(TAG, contacts+"");
 
             }
+
         }
+        String s = contacts.get(0).getIds();
         for(int i = 0; i < contacts.size(); i++) {
             ContactDB contactDB = new ContactDB(
                     contacts.get(i).getName(),
@@ -136,7 +140,13 @@ public class ReadContactPermission {
                     contacts.get(i).getIds(),
                     contacts.get(i).getEmail());
             contactDB.save();
+
         }
-        MainActivity.handler.sendEmptyMessage(0);
+        ma.handler.sendEmptyMessage(0);
+        cursor.close();
+        emailCu.close();
+        pCur.close();
     }
+
 }
+

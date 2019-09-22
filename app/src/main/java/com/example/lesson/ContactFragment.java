@@ -25,6 +25,8 @@ public class ContactFragment extends Fragment {
     int id;
     private LayoutInflater mInflater;
     LinearLayout mLinearLayout;
+    String LOG_TAG = "ContactFragment";
+    String keyPosition = "position";
 
     ContactFragment(){
 
@@ -40,7 +42,12 @@ public class ContactFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-        id = getArguments().getInt("position");
+        if (getArguments() != null) {
+            id = getArguments().getInt(keyPosition);
+        }
+        else {
+            Log.i(LOG_TAG,"getArgument is null");
+        }
 
     }
 
@@ -52,8 +59,19 @@ public class ContactFragment extends Fragment {
         name = (TextView) view.findViewById(R.id.name);
         phone = (TextView) view.findViewById(R.id.phone_number);
         email = (TextView) view.findViewById(R.id.email);
-
-        contactDBS = ContactDB.listAll(ContactDB.class);
+        Thread thread = new Thread(runnable);
+        thread.start();
+        return view;
+    }
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            contactDBS = ContactDB.listAll(ContactDB.class);
+            //contactDBS = ContactDB.find(ContactDB.class,"ids = ?",String.valueOf(id));
+            setData();
+        }
+    };
+    private void setData(){
         ContactDB contact = contactDBS.get(id);
         String nameText = contact.getName();
         String phoneNumber = contact.getPhone();
@@ -61,8 +79,6 @@ public class ContactFragment extends Fragment {
         name.setText("Имя "+nameText);
         phone.setText("Телефон "+phoneNumber);
         email.setText("Email "+emailData);
-
-        return view;
     }
 
 }

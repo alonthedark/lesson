@@ -2,7 +2,7 @@ package com.example.lesson;
 
 public class Contact {
 
-    private String id;
+    private String ids;
     private String name  = "";
     private String phone = "";
     private String email = "";
@@ -23,10 +23,10 @@ public class Contact {
     }
 
     public String getIds() {
-        return id;
+        return ids;
     }
-    public void setIds(String id) {
-        this.id = id;
+    public void setIds(String ids) {
+        this.ids = ids;
     }
 
     public String getEmail(){

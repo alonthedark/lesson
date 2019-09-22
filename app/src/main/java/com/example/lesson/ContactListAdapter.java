@@ -2,6 +2,7 @@ package com.example.lesson;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,15 +17,17 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     private List<String> mData;
     private List<Contact> contacts;
-    private List<ContactDB> contactDBS = ContactDB.listAll(ContactDB.class);;
+    private List<ContactDB> contactDBS;
     private LayoutInflater mInflater;
     private OnCliclListner mOnCliclListner;
+    ContactDB contact;
+    String LOG_TAG = "Adapter";
 
     // data is passed into the constructor
-    ContactListAdapter(Context context,OnCliclListner onCliclListner) {
+    ContactListAdapter(Context context, OnCliclListner onCliclListner, List<ContactDB> contactDBS) {
         this.mInflater = LayoutInflater.from(context);
         this.mOnCliclListner = onCliclListner;
-        //this.contacts = data;
+        this.contactDBS = contactDBS;
     }
 
     // inflates the row layout from xml when needed
@@ -39,14 +42,14 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        ContactDB contact = contactDBS.get(position);
+        contact = contactDBS.get(position);
         holder.myTextView.setText(contact.getName());
     }
 
     // total number of rows
     @Override
     public int getItemCount() {
-        return contactDBS.size();
+      return contactDBS.size();
     }
 
 
@@ -64,13 +67,18 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
         @Override
         public void onClick(View view) {
-            onCliclListner.onItemClick(getAdapterPosition());
+            int posit = getAdapterPosition();
+            if(posit != RecyclerView.NO_POSITION){
+                onCliclListner.onItemClick(getAdapterPosition());
+            }
+            else{
+                Log.i(LOG_TAG, "Get position no position");
+            }
         }
     }
 
     // parent activity will implement this method to respond to click events
     public interface OnCliclListner{
         void onItemClick(int position);
-
     }
 }

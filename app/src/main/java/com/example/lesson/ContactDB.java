@@ -6,7 +6,7 @@ public class ContactDB extends SugarRecord<ContactDB>{
 
     private String name;
     private String phone;
-    private String id;
+    private String ids;
     private String email;
 
 
@@ -14,16 +14,16 @@ public class ContactDB extends SugarRecord<ContactDB>{
     public ContactDB() {
     }
 
-    public ContactDB(String f_name, String phone, String id, String email) {
+    public ContactDB(String f_name, String phone, String ids, String email) {
         this.name = f_name;
         this.phone = phone;
-        this.id = id;
+        this.ids = ids;
         this.email = email;
     }
 
     public String getName() { return name; }
     public String getPhone(){ return phone; }
-    public String getIds(){return id;}
+    public String getIds(){return ids;}
     public String getEmail(){return email;}
 
 
@@ -32,7 +32,7 @@ public class ContactDB extends SugarRecord<ContactDB>{
         return "ContactDB{" +
                 "name='" + name + '\'' +
                 "phone='" + phone +'\'' +
-                "id='" + id +'\'' +
+                "ids='" + ids +'\'' +
                 "email='" + email +'\'' +
                 '}';
     }

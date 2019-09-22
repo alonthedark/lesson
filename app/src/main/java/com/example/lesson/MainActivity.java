@@ -14,12 +14,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,9 +35,10 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     public FragmentManager fragmentManager = getSupportFragmentManager();
     Context context = this;
     Activity activity = this;
-    static Handler handler;
+    MainActivity mainActivity = this;
+    Handler handler;
     int savePosition;
-
+    List<ContactDB> contactDBS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,8 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case CONTACT_READ:
+                        Thread tr = new Thread(readDB);
+                        tr.start();
                         startTransaction();
                         break;
                 }
@@ -55,16 +61,19 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
         int permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS);
 
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-            ReadContactPermission readContactPermission = new ReadContactPermission(activity, context);
-            readContactPermission.pemissionGranted();
+            Thread thread = new Thread(runnable);
+            thread.start();
+
         } else {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS},
                     PERMISSIONS_REQUEST_READ_CONTACTS);
         }
+
     }
 
 
     private void startTransaction() {
+
         contactListFragment = new ContactListFragment();
         fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
@@ -72,12 +81,25 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     public void setAdapter(RecyclerView recycler) {
 
         Log.d("1", "adapter");
-
-        ContactListAdapter adapter = new ContactListAdapter(this, this);
+        String id = contactDBS.get(0).getIds();
+        ContactListAdapter adapter = new ContactListAdapter(this, this, contactDBS);
         recycler.setAdapter(adapter);
         recycler.getAdapter().notifyDataSetChanged();
     }
 
+    Runnable readDB = new Runnable() {
+        @Override
+        public void run() {
+            contactDBS = ContactDB.listAll(ContactDB.class);
+        }
+    };
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            ReadContactPermission readContactPermission = new ReadContactPermission(activity, context, mainActivity);
+            readContactPermission.pemissionGranted();
+        }
+    };
 
     @Override
     public void onItemClick(int position) {

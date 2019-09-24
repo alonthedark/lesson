@@ -27,6 +27,7 @@ public class ContactFragment extends Fragment {
     LinearLayout mLinearLayout;
     String LOG_TAG = "ContactFragment";
     String keyPosition = "position";
+    Thread thread;
 
     ContactFragment(){
 
@@ -59,19 +60,12 @@ public class ContactFragment extends Fragment {
         name = (TextView) view.findViewById(R.id.name);
         phone = (TextView) view.findViewById(R.id.phone_number);
         email = (TextView) view.findViewById(R.id.email);
-        Thread thread = new Thread(runnable);
+        thread = new Thread(new readDB(this));
         thread.start();
         return view;
     }
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            contactDBS = ContactDB.listAll(ContactDB.class);
-            //contactDBS = ContactDB.find(ContactDB.class,"ids = ?",String.valueOf(id));
-            setData();
-        }
-    };
-    private void setData(){
+
+    public void setData(){
         ContactDB contact = contactDBS.get(id);
         String nameText = contact.getName();
         String phoneNumber = contact.getPhone();
@@ -80,5 +74,24 @@ public class ContactFragment extends Fragment {
         phone.setText("Телефон "+phoneNumber);
         email.setText("Email "+emailData);
     }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        thread.interrupt();
+    }
+}
+class readDB implements Runnable{
 
+    ContactFragment contactFragment;
+    readDB(ContactFragment contactFrag){
+        this.contactFragment = contactFrag;
+    }
+
+    @Override
+    public void run() {
+        if(!Thread.interrupted()) {
+            contactFragment.contactDBS = ContactDB.listAll(ContactDB.class);
+            contactFragment.setData();
+        }
+    }
 }

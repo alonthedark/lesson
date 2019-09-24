@@ -29,6 +29,7 @@ import java.util.List;
 public class MainActivity extends FragmentActivity implements ContactListAdapter.OnCliclListner {
 
     final static int CONTACT_READ = 0;
+    final static int DB_READ = 1;
     private final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     ContactListFragment contactListFragment;
     ContactFragment contactFragment;
@@ -39,6 +40,9 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     Handler handler;
     int savePosition;
     List<ContactDB> contactDBS;
+    String TAG = "MainActivity";
+    Thread thread;
+    Thread tr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +54,21 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case CONTACT_READ:
-                        Thread tr = new Thread(readDB);
+                        tr = new Thread(readDB);
                         tr.start();
+                        break;
+                    case DB_READ:
                         startTransaction();
                         break;
                 }
             }
         };
+        pemissionGranted();
 
         int permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS);
 
         if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
-            Thread thread = new Thread(runnable);
-            thread.start();
+
 
         } else {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS},
@@ -90,14 +96,19 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     Runnable readDB = new Runnable() {
         @Override
         public void run() {
-            contactDBS = ContactDB.listAll(ContactDB.class);
+            if(!Thread.interrupted()) {
+                contactDBS = ContactDB.listAll(ContactDB.class);
+                handler.sendEmptyMessage(DB_READ);
+            }
         }
     };
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            ReadContactPermission readContactPermission = new ReadContactPermission(activity, context, mainActivity);
-            readContactPermission.pemissionGranted();
+            if(!Thread.interrupted()) {
+                ReadContactPermission readContactPermission = new ReadContactPermission(activity, context, mainActivity);
+                readContactPermission.readContacts(context);
+            }
         }
     };
 
@@ -111,6 +122,32 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
         contactFragment.setArguments(bundle);
         fragmentManager.beginTransaction().replace(R.id.frag, contactFragment).addToBackStack(null).commit();
         Log.d("CLICK", "CLICK " + position);
+    }
+
+    public void pemissionGranted() {
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.READ_CONTACTS) ==
+                PackageManager.PERMISSION_GRANTED) {
+            // Разрешения чтения контактов имеются
+            Log.d(TAG, "Permission is granted");
+            thread = new Thread(runnable);
+            thread.start();
+        } else {
+            // Разрешений нет
+            Log.d(TAG, "Permission is not granted");
+
+            // Запрос разрешений
+            Log.d(TAG, "Request permissions");
+
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.READ_CONTACTS},PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        thread.interrupt();
+        tr.interrupt();
     }
 
 }

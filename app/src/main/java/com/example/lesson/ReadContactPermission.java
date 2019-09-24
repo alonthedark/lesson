@@ -18,6 +18,7 @@ public class ReadContactPermission {
     Cursor pCur;
     Cursor emailCu;
     MainActivity ma;
+    int ids = 0;
 
 
     ReadContactPermission(Activity activity, Context context, MainActivity ma) {
@@ -39,11 +40,11 @@ public class ReadContactPermission {
                 while (cursor.moveToNext()) {
                     contact = new Contact();
                     String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                    contact.setIds(id);
+                    //contact.setIds(id);
 
                     String name = cursor.getString(cursor.getColumnIndex(
                             ContactsContract.Contacts.DISPLAY_NAME));
-                    contact.setName(name);
+
 
                     String has_phone = cursor.getString(cursor.getColumnIndex(
                             ContactsContract.Contacts.HAS_PHONE_NUMBER));
@@ -51,6 +52,9 @@ public class ReadContactPermission {
                     if (Integer.parseInt(has_phone) > 0) {
                         // extract phone number
 
+                        contact.setIds(String.valueOf(ids));
+                        ids++;
+                        contact.setName(name);
                         pCur = context.getContentResolver().query(
                                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
                                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
@@ -88,7 +92,8 @@ public class ReadContactPermission {
                 }
 
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            Log.e(TAG,""+e);
 
         } finally {
 

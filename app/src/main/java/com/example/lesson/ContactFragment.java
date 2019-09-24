@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.renderscript.Sampler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,14 +13,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.orm.SugarRecord;
+
 import androidx.fragment.app.Fragment;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class ContactFragment extends Fragment {
 
     Context context;
-    List<ContactDB> contactDBS;
+    ContactDB contactDBS;
     final static int DATA_READ = 1;
     ImageView avatar;
     TextView name;
@@ -82,10 +86,9 @@ public class ContactFragment extends Fragment {
     }
 
     private void setData(){
-        ContactDB contact = contactDBS.get(id);
-        String nameText = contact.getName();
-        String phoneNumber = contact.getPhone();
-        String emailData = contact.getEmail();
+        String nameText = contactDBS.getName();
+        String phoneNumber = contactDBS.getPhone();
+        String emailData = contactDBS.getEmail();
         name.setText("Имя "+nameText);
         phone.setText("Телефон "+phoneNumber);
         email.setText("Email "+emailData);
@@ -96,17 +99,24 @@ public class ContactFragment extends Fragment {
         thread.interrupt();
     }
 }
-class readDB implements Runnable{
+class readDB implements Runnable {
 
-    ContactFragment contactFragment;
+
+    WeakReference<ContactFragment> weakReference;
     readDB(ContactFragment contactFrag){
-        this.contactFragment = contactFrag;
+        weakReference = new WeakReference(contactFrag);
+
     }
 
     @Override
     public void run() {
         if(!Thread.interrupted()) {
-            contactFragment.contactDBS = ContactDB.listAll(ContactDB.class);
+            ContactFragment contactFragment = weakReference.get();
+            Long id = Long.valueOf(contactFragment.id);
+            int ids = contactFragment.id;
+            String idsArg = String.valueOf(ids);
+            List<ContactDB> contactDBS = ContactDB.find(ContactDB.class,"ids = ?", idsArg);
+            contactFragment.contactDBS = contactDBS.get(0);
             contactFragment.handl.sendEmptyMessage(contactFragment.DATA_READ);
         }
     }

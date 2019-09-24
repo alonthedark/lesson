@@ -2,6 +2,8 @@ package com.example.lesson;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ public class ContactFragment extends Fragment {
 
     Context context;
     List<ContactDB> contactDBS;
+    final static int DATA_READ = 1;
     ImageView avatar;
     TextView name;
     TextView phone;
@@ -28,8 +31,11 @@ public class ContactFragment extends Fragment {
     String LOG_TAG = "ContactFragment";
     String keyPosition = "position";
     Thread thread;
+    Handler handl;
 
     ContactFragment(){
+
+
 
     }
     public static ContactFragment newInstance(int position) {
@@ -43,6 +49,16 @@ public class ContactFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
+        handl = new Handler() {
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case DATA_READ:
+                        setData();
+                        break;
+
+                }
+            }
+        };
         if (getArguments() != null) {
             id = getArguments().getInt(keyPosition);
         }
@@ -65,7 +81,7 @@ public class ContactFragment extends Fragment {
         return view;
     }
 
-    public void setData(){
+    private void setData(){
         ContactDB contact = contactDBS.get(id);
         String nameText = contact.getName();
         String phoneNumber = contact.getPhone();
@@ -91,7 +107,7 @@ class readDB implements Runnable{
     public void run() {
         if(!Thread.interrupted()) {
             contactFragment.contactDBS = ContactDB.listAll(ContactDB.class);
-            contactFragment.setData();
+            contactFragment.handl.sendEmptyMessage(contactFragment.DATA_READ);
         }
     }
 }

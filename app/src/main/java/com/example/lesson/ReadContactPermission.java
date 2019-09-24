@@ -91,19 +91,22 @@ public class ReadContactPermission {
         } catch (Exception e) {
 
         } finally {
-            for (int i = 0; i < contacts.size(); i++) {
-                ContactDB contactDB = new ContactDB(
-                        contacts.get(i).getName(),
-                        contacts.get(i).getPhone(),
-                        contacts.get(i).getIds(),
-                        contacts.get(i).getEmail());
-                contactDB.save();
-                ma.handler.sendEmptyMessage(0);
+
+
                 cursor.close();
                 emailCu.close();
                 pCur.close();
             }
+        for (int i = 0; i < contacts.size(); i++) {
+            ContactDB contactDB = new ContactDB(
+                    contacts.get(i).getName(),
+                    contacts.get(i).getPhone(),
+                    contacts.get(i).getIds(),
+                    contacts.get(i).getEmail());
+            contactDB.save();
        }
+        ma.handler.sendEmptyMessage(0);
     }
+
 }
 

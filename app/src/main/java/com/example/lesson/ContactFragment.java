@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.renderscript.Sampler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,12 +12,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.orm.SugarRecord;
-
-import androidx.fragment.app.Fragment;
-
 import java.lang.ref.WeakReference;
 import java.util.List;
+
+import androidx.fragment.app.Fragment;
 
 public class ContactFragment extends Fragment {
 
@@ -111,13 +108,16 @@ class readDB implements Runnable {
     @Override
     public void run() {
         if(!Thread.interrupted()) {
-            ContactFragment contactFragment = weakReference.get();
-            Long id = Long.valueOf(contactFragment.id);
-            int ids = contactFragment.id;
-            String idsArg = String.valueOf(ids);
-            List<ContactDB> contactDBS = ContactDB.find(ContactDB.class,"ids = ?", idsArg);
-            contactFragment.contactDBS = contactDBS.get(0);
-            contactFragment.handl.sendEmptyMessage(contactFragment.DATA_READ);
+            if(weakReference != null) {
+                ContactFragment contactFragment = weakReference.get();
+                int ids = contactFragment.id;
+                String idsArg = String.valueOf(ids);
+                List<ContactDB> contactDBS = ContactDB.find(ContactDB.class, "ids = ?", idsArg);
+                if(contactDBS.size()!=0) {
+                    contactFragment.contactDBS = contactDBS.get(0);
+                    contactFragment.handl.sendEmptyMessage(contactFragment.DATA_READ);
+                }
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import androidx.core.app.ActivityCompat;
@@ -69,7 +69,6 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
 
     }
 
-
     private void startTransaction() {
 
         contactListFragment = new ContactListFragment();
@@ -79,29 +78,10 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     public void setAdapter(RecyclerView recycler) {
 
         Log.d("1", "adapter");
-        //Long id = contactDBS.get(0).getId();
         ContactListAdapter adapter = new ContactListAdapter(this, this, contactDBS);
         recycler.setAdapter(adapter);
         recycler.getAdapter().notifyDataSetChanged();
     }
-
-    Runnable readDB = new Runnable() {
-        @Override
-        public void run() {
-            if(!Thread.interrupted()) {
-                contactDBS = ContactDB.listAll(ContactDB.class);
-                handler.sendEmptyMessage(DB_READ);
-            }
-        }
-    };
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            if(!Thread.interrupted()) {
-
-            }
-        }
-    };
 
     @Override
     public void onItemClick(int position) {
@@ -144,39 +124,40 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
 class contactRecive implements Runnable {
 
 
-    SoftReference<MainActivity> softReference;
+    WeakReference<MainActivity> weakReference;
 
     contactRecive(MainActivity mainActivity){
-        softReference = new SoftReference(mainActivity);
-
+        weakReference = new WeakReference(mainActivity);
     }
 
     @Override
     public void run() {
         if(!Thread.interrupted()) {
-            MainActivity mainActivity = softReference.get();
-            ReadContactPermission readContactPermission = new ReadContactPermission(mainActivity.activity, mainActivity.context, mainActivity);
-            readContactPermission.readContacts(mainActivity.context);
+            if(weakReference != null) {
+                MainActivity mainActivity = weakReference.get();
+                ReadContactPermission readContactPermission = new ReadContactPermission(mainActivity.activity, mainActivity.context, mainActivity);
+                readContactPermission.readContacts(mainActivity.context);
+            }
         }
     }
 }
 
 class readContactDb implements Runnable {
 
+    WeakReference<MainActivity> weakReference;
 
-
-    SoftReference<MainActivity> softReference;
     readContactDb(MainActivity mainActivity){
-        softReference = new SoftReference(mainActivity);
-
+        weakReference = new WeakReference(mainActivity);
     }
 
     @Override
     public void run() {
         if(!Thread.interrupted()) {
-            MainActivity mainActivity = softReference.get();
-            mainActivity.contactDBS = ContactDB.listAll(ContactDB.class);
-            mainActivity.handler.sendEmptyMessage(mainActivity.DB_READ);
+            if(weakReference != null) {
+                MainActivity mainActivity = weakReference.get();
+                mainActivity.contactDBS = ContactDB.listAll(ContactDB.class);
+                mainActivity.handler.sendEmptyMessage(mainActivity.DB_READ);
+            }
         }
     }
 }

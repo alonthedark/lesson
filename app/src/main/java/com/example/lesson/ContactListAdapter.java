@@ -15,8 +15,6 @@ import java.util.List;
 
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder>{
 
-    private List<String> mData;
-    private List<Contact> contacts;
     private List<ContactDB> contactDBS;
     private LayoutInflater mInflater;
     private OnCliclListner mOnCliclListner;

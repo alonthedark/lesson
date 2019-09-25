@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,6 @@ public class ReadContactPermission {
                 while (cursor.moveToNext()) {
                     contact = new Contact();
                     String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                    //contact.setIds(id);
 
                     String name = cursor.getString(cursor.getColumnIndex(
                             ContactsContract.Contacts.DISPLAY_NAME));
@@ -92,16 +92,12 @@ public class ReadContactPermission {
                 }
 
             }
-        } catch (RuntimeException e) {
-            Log.e(TAG,""+e);
-
         } finally {
-
-
                 cursor.close();
                 emailCu.close();
                 pCur.close();
             }
+
         for (int i = 0; i < contacts.size(); i++) {
             ContactDB contactDB = new ContactDB(
                     contacts.get(i).getName(),
@@ -110,7 +106,7 @@ public class ReadContactPermission {
                     contacts.get(i).getEmail());
             contactDB.save();
        }
-        ma.handler.sendEmptyMessage(0);
+        ma.handler.sendEmptyMessage(ma.CONTACT_READ);
     }
 
 }

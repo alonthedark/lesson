@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReadContactPermission {
+public class ReadContact {
     String TAG = "Permission contact";
     Context context;
     public List<Contact> contacts = new ArrayList<>();
@@ -22,7 +22,7 @@ public class ReadContactPermission {
     int ids = 0;
 
 
-    ReadContactPermission(Activity activity, Context context, MainActivity ma) {
+    ReadContact(Activity activity, Context context, MainActivity ma) {
         this.context = context;
         this.activity = activity;
         this.ma = ma;
@@ -44,7 +44,6 @@ public class ReadContactPermission {
 
                     String name = cursor.getString(cursor.getColumnIndex(
                             ContactsContract.Contacts.DISPLAY_NAME));
-
 
                     String has_phone = cursor.getString(cursor.getColumnIndex(
                             ContactsContract.Contacts.HAS_PHONE_NUMBER));
@@ -79,24 +78,20 @@ public class ReadContactPermission {
                                 contact.setEmail(emailg);
                             }
                         }
-
                         contacts.add(contact);
-
                     }
                     Log.d(TAG, "Contact id=" + contact.getIds() +
                             ", name=" + contact.getName() +
                             ", phone=" + contact.getPhone() +
                             ", email=" + contact.getEmail());
                     Log.d(TAG, contacts + "");
-
                 }
-
             }
         } finally {
-                cursor.close();
-                emailCu.close();
-                pCur.close();
-            }
+            cursor.close();
+            emailCu.close();
+            pCur.close();
+        }
 
         for (int i = 0; i < contacts.size(); i++) {
             ContactDB contactDB = new ContactDB(
@@ -105,7 +100,7 @@ public class ReadContactPermission {
                     contacts.get(i).getIds(),
                     contacts.get(i).getEmail());
             contactDB.save();
-       }
+        }
         ma.handler.sendEmptyMessage(ma.CONTACT_READ);
     }
 

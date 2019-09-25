@@ -46,7 +46,7 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case CONTACT_READ:
-                        tr = new Thread(new readContactDb(mainActivity));
+                        tr = new Thread(new ReadContactDb(mainActivity));
                         tr.start();
                         break;
                     case DB_READ:
@@ -101,7 +101,7 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
                 PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
             Log.d(TAG, "Permission is granted");
-            thread = new Thread(new contactRecive(mainActivity));
+            thread = new Thread(new ContactRecive(mainActivity));
             thread.start();
         } else {
             // Разрешений нет
@@ -123,12 +123,12 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     }
 }
 
-class contactRecive implements Runnable {
+class ContactRecive implements Runnable {
 
 
     WeakReference<MainActivity> weakReference;
 
-    contactRecive(MainActivity mainActivity) {
+    ContactRecive(MainActivity mainActivity) {
         weakReference = new WeakReference(mainActivity);
     }
 
@@ -137,18 +137,18 @@ class contactRecive implements Runnable {
         if (!Thread.interrupted()) {
             MainActivity mainActivity = weakReference.get();
             if (mainActivity != null) {
-                ReadContactPermission readContactPermission = new ReadContactPermission(mainActivity.activity, mainActivity.context, mainActivity);
+                ReadContact readContactPermission = new ReadContact(mainActivity.activity, mainActivity.context, mainActivity);
                 readContactPermission.readContacts(mainActivity.context);
             }
         }
     }
 }
 
-class readContactDb implements Runnable {
+class ReadContactDb implements Runnable {
 
     WeakReference<MainActivity> weakReference;
 
-    readContactDb(MainActivity mainActivity) {
+    ReadContactDb(MainActivity mainActivity) {
         weakReference = new WeakReference(mainActivity);
     }
 

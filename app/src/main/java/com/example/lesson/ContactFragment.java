@@ -34,11 +34,11 @@ public class ContactFragment extends Fragment {
     Thread thread;
     Handler handl;
 
-    ContactFragment(){
-
+    ContactFragment() {
 
 
     }
+
     public static ContactFragment newInstance(int position) {
         ContactFragment fragment = new ContactFragment();
         Bundle args = fragment.getArguments();
@@ -62,63 +62,65 @@ public class ContactFragment extends Fragment {
         };
         if (getArguments() != null) {
             id = getArguments().getInt(keyPosition);
+        } else {
+            Log.i(LOG_TAG, "getArgument is null");
         }
-        else {
-            Log.i(LOG_TAG,"getArgument is null");
-        }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.contact_fragment, container, false);
-        avatar =(ImageView) view.findViewById(R.id.avatar);
+        avatar = (ImageView) view.findViewById(R.id.avatar);
         name = (TextView) view.findViewById(R.id.name);
         phone = (TextView) view.findViewById(R.id.phone_number);
         email = (TextView) view.findViewById(R.id.email);
-        thread = new Thread(new readDB(this));
+        thread = new Thread(new ReadDb(this));
         thread.start();
         return view;
     }
 
-    private void setData(){
+    private void setData() {
         String nameText = contactDBS.getName();
         String phoneNumber = contactDBS.getPhone();
         String emailData = contactDBS.getEmail();
-        name.setText("Имя "+nameText);
-        phone.setText("Телефон "+phoneNumber);
-        email.setText("Email "+emailData);
+        name.setText("Имя " + nameText);
+        phone.setText("Телефон " + phoneNumber);
+        email.setText("Email " + emailData);
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         thread.interrupt();
     }
-}
-class readDB implements Runnable {
+    static class ReadDb implements Runnable {
 
 
-    WeakReference<ContactFragment> weakReference;
-    readDB(ContactFragment contactFrag){
-        weakReference = new WeakReference(contactFrag);
+        WeakReference<ContactFragment> weakReference;
 
-    }
+        ReadDb(ContactFragment contactFrag) {
+            weakReference = new WeakReference(contactFrag);
 
-    @Override
-    public void run() {
-        if(!Thread.interrupted()) {
+        }
+
+        @Override
+        public void run() {
+            if (!Thread.interrupted()) {
 
                 ContactFragment contactFragment = weakReference.get();
-            if(contactFragment != null) {
-                int ids = contactFragment.id;
-                String idsArg = String.valueOf(ids);
-                List<ContactDB> contactDBS = ContactDB.find(ContactDB.class, "ids = ?", idsArg);
-                if(contactDBS.size()!=0) {
-                    contactFragment.contactDBS = contactDBS.get(0);
-                    contactFragment.handl.sendEmptyMessage(contactFragment.DATA_READ);
+                if (contactFragment != null) {
+                    int ids = contactFragment.id;
+                    String idsArg = String.valueOf(ids);
+                    List<ContactDB> contactDBS = ContactDB.find(ContactDB.class, "ids = ?", idsArg);
+                    if (contactDBS.size() != 0) {
+                        contactFragment.contactDBS = contactDBS.get(0);
+                        contactFragment.handl.sendEmptyMessage(contactFragment.DATA_READ);
+                    }
                 }
             }
         }
     }
 }
+
+

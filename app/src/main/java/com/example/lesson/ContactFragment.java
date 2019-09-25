@@ -108,8 +108,9 @@ class readDB implements Runnable {
     @Override
     public void run() {
         if(!Thread.interrupted()) {
-            if(weakReference != null) {
+
                 ContactFragment contactFragment = weakReference.get();
+            if(contactFragment != null) {
                 int ids = contactFragment.id;
                 String idsArg = String.valueOf(ids);
                 List<ContactDB> contactDBS = ContactDB.find(ContactDB.class, "ids = ?", idsArg);

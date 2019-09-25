@@ -111,9 +111,10 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
             Log.d(TAG, "Request permissions");
 
             ActivityCompat.requestPermissions(activity,
-                    new String[]{Manifest.permission.READ_CONTACTS},PERMISSIONS_REQUEST_READ_CONTACTS);
+                    new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         }
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -121,20 +122,21 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
         tr.interrupt();
     }
 }
+
 class contactRecive implements Runnable {
 
 
     WeakReference<MainActivity> weakReference;
 
-    contactRecive(MainActivity mainActivity){
+    contactRecive(MainActivity mainActivity) {
         weakReference = new WeakReference(mainActivity);
     }
 
     @Override
     public void run() {
-        if(!Thread.interrupted()) {
-            if(weakReference != null) {
-                MainActivity mainActivity = weakReference.get();
+        if (!Thread.interrupted()) {
+            MainActivity mainActivity = weakReference.get();
+            if (mainActivity != null) {
                 ReadContactPermission readContactPermission = new ReadContactPermission(mainActivity.activity, mainActivity.context, mainActivity);
                 readContactPermission.readContacts(mainActivity.context);
             }
@@ -146,15 +148,15 @@ class readContactDb implements Runnable {
 
     WeakReference<MainActivity> weakReference;
 
-    readContactDb(MainActivity mainActivity){
+    readContactDb(MainActivity mainActivity) {
         weakReference = new WeakReference(mainActivity);
     }
 
     @Override
     public void run() {
-        if(!Thread.interrupted()) {
-            if(weakReference != null) {
-                MainActivity mainActivity = weakReference.get();
+        if (!Thread.interrupted()) {
+            MainActivity mainActivity = weakReference.get();
+            if (mainActivity != null) {
                 mainActivity.contactDBS = ContactDB.listAll(ContactDB.class);
                 mainActivity.handler.sendEmptyMessage(mainActivity.DB_READ);
             }

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -21,7 +22,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ContactListFragment extends Fragment {
+public class ContactListFragment extends Fragment implements ContactListAdapter.OnCliclListner{
 
     Handler handler;
     private ContactListFragment contactListFragment = this;
@@ -30,15 +31,16 @@ public class ContactListFragment extends Fragment {
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     private static final String TAG = "ContactList";
     private List<ContactDB> contactDBList;
-    private ContactListAdapter.OnCliclListner mOnCliclListner;
     private Context context;
     private Activity activity;
     private RecyclerView recyclerView;
     private Thread thContactReceive;
     private Thread trReadDb;
+    private boolean resume = false;
 
-    ContactListFragment(ContactListAdapter.OnCliclListner onCliclListner) {
-        this.mOnCliclListner = onCliclListner;
+
+    ContactListFragment(){
+
     }
 
     @Override
@@ -46,7 +48,9 @@ public class ContactListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         activity = getActivity();
         context = getActivity();
-        permissionGranted();
+        if (savedInstanceState == null) {
+            permissionGranted();
+        }
         handler = new Handler() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -56,6 +60,7 @@ public class ContactListFragment extends Fragment {
                         break;
                     case DB_READ:
                         setAdapter(recyclerView,contactDBList);
+                        resume = true;
                         break;
                 }
             }
@@ -69,6 +74,9 @@ public class ContactListFragment extends Fragment {
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
+        if(resume){
+            setAdapter(recyclerView,contactDBList);
+        }
 
         return view;
     }
@@ -89,14 +97,21 @@ public class ContactListFragment extends Fragment {
 
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+            permissionGranted();
+
         }
+    }
+    @Override
+    public void onItemClick(int position) {
+        ((MainActivity) Objects.requireNonNull(getActivity())).onItemClick(position);
     }
 
     private void setAdapter(RecyclerView recycler, List<ContactDB> contactDBS) {
         Log.d(TAG, "adapter");
-        ContactListAdapter adapter = new ContactListAdapter(context, mOnCliclListner, contactDBS);
+        ContactListAdapter adapter = new ContactListAdapter(context, this, contactDBS);
         recycler.setAdapter(adapter);
     }
+
     @Override
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);

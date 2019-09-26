@@ -13,19 +13,17 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
     FragmentManager fragmentManager = getSupportFragmentManager();
     private static final String TAG = "MainActivity";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         if (savedInstanceState == null) {
             startTransaction();
         }
     }
 
     private void startTransaction() {
-        contactListFragment = new ContactListFragment(this);
+        contactListFragment = new ContactListFragment();
         fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
 

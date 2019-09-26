@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentManager;
 
 public class MainActivity extends FragmentActivity implements ContactListAdapter.OnCliclListner {
 
-
     ContactListFragment contactListFragment;
     ContactFragment contactFragment;
     FragmentManager fragmentManager = getSupportFragmentManager();
@@ -25,17 +24,16 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
 
     private void startTransaction() {
         contactListFragment = new ContactListFragment(this);
-        fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).addToBackStack(null).commit();
+        fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
-
-
+    
     @Override
     public void onItemClick(int position) {
         Bundle bundle = new Bundle();
         bundle.putInt("position", position);
         contactFragment = new ContactFragment();
         contactFragment.setArguments(bundle);
-        fragmentManager.beginTransaction().hide(contactListFragment).add(R.id.frag, contactFragment).addToBackStack(null).commit();
+        fragmentManager.beginTransaction().replace(R.id.frag, contactFragment).addToBackStack(null).commit();
         Log.d(TAG, "CLICK " + position);
     }
 }

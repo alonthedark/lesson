@@ -96,7 +96,6 @@ public class ContactListFragment extends Fragment {
         Log.d(TAG, "adapter");
         ContactListAdapter adapter = new ContactListAdapter(context, mOnCliclListner, contactDBS);
         recycler.setAdapter(adapter);
-        recycler.getAdapter();
     }
     @Override
     public void onDestroy() {

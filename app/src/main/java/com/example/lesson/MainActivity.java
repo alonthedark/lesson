@@ -19,14 +19,17 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        startTransaction();
+        if (savedInstanceState == null) {
+            startTransaction();
+        }
     }
 
     private void startTransaction() {
         contactListFragment = new ContactListFragment(this);
         fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
-    
+
+
     @Override
     public void onItemClick(int position) {
         Bundle bundle = new Bundle();

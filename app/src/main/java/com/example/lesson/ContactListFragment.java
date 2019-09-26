@@ -16,6 +16,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -36,8 +37,6 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
     private RecyclerView recyclerView;
     private Thread thContactReceive;
     private Thread trReadDb;
-    private boolean resume = false;
-
 
     ContactListFragment(){
 
@@ -48,9 +47,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         super.onCreate(savedInstanceState);
         activity = getActivity();
         context = getActivity();
-        if (savedInstanceState == null) {
-            permissionGranted();
-        }
+
         handler = new Handler() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -60,7 +57,6 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
                         break;
                     case DB_READ:
                         setAdapter(recyclerView,contactDBList);
-                        resume = true;
                         break;
                 }
             }
@@ -74,8 +70,8 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
-        if(resume){
-            setAdapter(recyclerView,contactDBList);
+        if (savedInstanceState == null) {
+            permissionGranted();
         }
 
         return view;
@@ -95,12 +91,28 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
             // Запрос разрешений
             Log.d(TAG, "Request permissions");
 
-            ActivityCompat.requestPermissions(activity,
-                    new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
-            permissionGranted();
-
+            requestPermissions(new String[]{
+                    Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_CONTACTS:
+                if (ContextCompat.checkSelfPermission(context,
+                        Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                    // permission granted
+                    thContactReceive = new Thread(new ContactReceive(contactListFragment));
+                    thContactReceive.start();
+                } else {
+                    // permission denied
+                    Log.d(TAG, "Permission is not granted");
+                }
+                return;
+        }
+    }
+
     @Override
     public void onItemClick(int position) {
         ((MainActivity) Objects.requireNonNull(getActivity())).onItemClick(position);

@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
@@ -19,18 +18,18 @@ import androidx.fragment.app.Fragment;
 
 public class ContactFragment extends Fragment {
 
-    Context context;
-    ContactDB contactDBS;
-    final static int DATA_READ = 1;
-    ImageView avatar;
-    TextView name;
-    TextView phone;
-    TextView email;
-    int id;
-    String LOG_TAG = "ContactFragment";
-    String KEY_POSITION = "position";
-    Thread thread;
-    Handler handl;
+    private Context context;
+    private ContactDB contactDBS;
+    private final static int DATA_READ = 1;
+    private static final String LOG_TAG = "ContactFragment";
+    private static final String KEY_POSITION = "position";
+    private ImageView avatar;
+    private TextView name;
+    private TextView phone;
+    private TextView email;
+    private int id;
+    private Thread thread;
+    private Handler handl;
 
     ContactFragment() {
 

@@ -9,16 +9,16 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReadContact {
-    String TAG = "Permission contact";
-    Context context;
-    public List<Contact> contacts = new ArrayList<>();
-    Activity activity;
-    Cursor cursor;
-    Cursor pCur;
-    Cursor emailCu;
-    ContactListFragment contactListFragment;
-    int ids = 0;
+class ReadContact {
+    private static final String TAG = "Permission contact";
+    private Context context;
+    private List<Contact> contacts = new ArrayList<>();
+    private Activity activity;
+    private Cursor cursor;
+    private Cursor pCur;
+    private Cursor emailCu;
+    private ContactListFragment contactListFragment;
+    private int ids = 0;
 
 
     ReadContact(Activity activity, Context context, ContactListFragment contactListFragment) {
@@ -29,7 +29,7 @@ public class ReadContact {
     }
 
 
-    public void readContacts(Context context) {
+    void readContacts(Context context) {
         Contact contact;
 
         try {

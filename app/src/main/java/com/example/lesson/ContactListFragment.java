@@ -26,17 +26,19 @@ public class ContactListFragment extends Fragment {
     Handler handler;
     private ContactListFragment contactListFragment = this;
     final static int CONTACT_READ = 0;
-    final static int DB_READ = 1;
-    private final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
+    private final static int DB_READ = 1;
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
+    private static final String TAG = "ContactList";
     private List<ContactDB> contactDBList;
+    private ContactListAdapter.OnCliclListner mOnCliclListner;
     private Context context;
     private Activity activity;
     private RecyclerView recyclerView;
-    private String TAG = "ContactList";
     private Thread thContactReceive;
     private Thread trReadDb;
 
-    public ContactListFragment() {
+    ContactListFragment(ContactListAdapter.OnCliclListner onCliclListner) {
+        this.mOnCliclListner = onCliclListner;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class ContactListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         activity = getActivity();
         context = getActivity();
-        pemissionGranted();
+        permissionGranted();
         handler = new Handler() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -53,7 +55,7 @@ public class ContactListFragment extends Fragment {
                         trReadDb.start();
                         break;
                     case DB_READ:
-                        ((MainActivity) getActivity()).setAdapter(recyclerView, contactDBList);
+                        setAdapter(recyclerView,contactDBList);
                         break;
                 }
             }
@@ -71,7 +73,7 @@ public class ContactListFragment extends Fragment {
         return view;
     }
 
-    public void pemissionGranted() {
+    private void permissionGranted() {
         if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
@@ -90,6 +92,12 @@ public class ContactListFragment extends Fragment {
         }
     }
 
+    private void setAdapter(RecyclerView recycler, List<ContactDB> contactDBS) {
+        Log.d(TAG, "adapter");
+        ContactListAdapter adapter = new ContactListAdapter(context, mOnCliclListner, contactDBS);
+        recycler.setAdapter(adapter);
+        recycler.getAdapter().notifyDataSetChanged();
+    }
     @Override
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);

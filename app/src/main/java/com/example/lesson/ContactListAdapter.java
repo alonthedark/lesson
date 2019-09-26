@@ -18,8 +18,8 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     private List<ContactDB> contactDBS;
     private LayoutInflater mInflater;
     private OnCliclListner mOnCliclListner;
-    ContactDB contact;
-    String LOG_TAG = "Adapter";
+    private ContactDB contact;
+    private static final String LOG_TAG = "Adapter";
 
     // data is passed into the constructor
     ContactListAdapter(Context context, OnCliclListner onCliclListner, List<ContactDB> contactDBS) {
@@ -31,7 +31,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     // inflates the row layout from xml when needed
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.recyclerview_row, parent, false);
         return new ViewHolder(view, mOnCliclListner);
     }

@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +17,14 @@ public class ReadContact {
     Cursor cursor;
     Cursor pCur;
     Cursor emailCu;
-    MainActivity ma;
+    ContactListFragment contactListFragment;
     int ids = 0;
 
 
-    ReadContact(Activity activity, Context context, MainActivity ma) {
+    ReadContact(Activity activity, Context context, ContactListFragment contactListFragment) {
         this.context = context;
         this.activity = activity;
-        this.ma = ma;
+        this.contactListFragment = contactListFragment;
         ContactDB.deleteAll(ContactDB.class);
     }
 
@@ -101,7 +100,7 @@ public class ReadContact {
                     contacts.get(i).getEmail());
             contactDB.save();
         }
-        ma.handler.sendEmptyMessage(ma.CONTACT_READ);
+        contactListFragment.handler.sendEmptyMessage(contactListFragment.CONTACT_READ);
     }
 
 }

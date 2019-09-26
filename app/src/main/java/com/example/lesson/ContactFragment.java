@@ -27,15 +27,12 @@ public class ContactFragment extends Fragment {
     TextView phone;
     TextView email;
     int id;
-    private LayoutInflater mInflater;
-    LinearLayout mLinearLayout;
     String LOG_TAG = "ContactFragment";
-    String keyPosition = "position";
+    String KEY_POSITION = "position";
     Thread thread;
     Handler handl;
 
     ContactFragment() {
-
 
     }
 
@@ -61,7 +58,7 @@ public class ContactFragment extends Fragment {
             }
         };
         if (getArguments() != null) {
-            id = getArguments().getInt(keyPosition);
+            id = getArguments().getInt(KEY_POSITION);
         } else {
             Log.i(LOG_TAG, "getArgument is null");
         }
@@ -91,9 +88,11 @@ public class ContactFragment extends Fragment {
 
     @Override
     public void onDestroy() {
+        handl.removeCallbacksAndMessages(null);
         super.onDestroy();
         thread.interrupt();
     }
+
     static class ReadDb implements Runnable {
 
 

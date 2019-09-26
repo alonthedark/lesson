@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder>{
+public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder> {
 
     private List<ContactDB> contactDBS;
     private LayoutInflater mInflater;
@@ -33,7 +33,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.recyclerview_row, parent, false);
-        return new ViewHolder(view,mOnCliclListner);
+        return new ViewHolder(view, mOnCliclListner);
     }
 
     // binds the data to the TextView in each row
@@ -47,7 +47,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     // total number of rows
     @Override
     public int getItemCount() {
-      return contactDBS.size();
+        return contactDBS.size();
     }
 
 
@@ -56,7 +56,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         TextView myTextView;
         OnCliclListner onCliclListner;
 
-        ViewHolder(View itemView,OnCliclListner onCliclListner) {
+        ViewHolder(View itemView, OnCliclListner onCliclListner) {
             super(itemView);
             myTextView = itemView.findViewById(R.id.name);
             this.onCliclListner = onCliclListner;
@@ -66,17 +66,16 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         @Override
         public void onClick(View view) {
             int posit = getAdapterPosition();
-            if(posit != RecyclerView.NO_POSITION){
+            if (posit != RecyclerView.NO_POSITION) {
                 onCliclListner.onItemClick(getAdapterPosition());
-            }
-            else{
+            } else {
                 Log.i(LOG_TAG, "Get position no position");
             }
         }
     }
 
     // parent activity will implement this method to respond to click events
-    public interface OnCliclListner{
+    public interface OnCliclListner {
         void onItemClick(int position);
     }
 }

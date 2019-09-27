@@ -1,6 +1,6 @@
 package com.example.lesson;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,11 +14,11 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 public class ContactFragment extends Fragment {
 
-    private Context context;
     private ContactDB contactDBS;
     private final static int DATA_READ = 1;
     private static final String LOG_TAG = "ContactFragment";
@@ -31,31 +31,14 @@ public class ContactFragment extends Fragment {
     private Thread thread;
     private Handler handl;
 
-    ContactFragment() {
+    public ContactFragment() {
 
     }
-
-    public static ContactFragment newInstance(int position) {
-        ContactFragment fragment = new ContactFragment();
-        Bundle args = fragment.getArguments();
-        return fragment;
-    }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getActivity();
-        handl = new Handler() {
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case DATA_READ:
-                        setData();
-                        break;
-
-                }
-            }
-        };
+        handl = new IncomingHandler(this);
         if (getArguments() != null) {
             id = getArguments().getInt(KEY_POSITION);
         } else {
@@ -76,6 +59,7 @@ public class ContactFragment extends Fragment {
         return view;
     }
 
+    @SuppressLint("SetTextI18n")
     private void setData() {
         String nameText = contactDBS.getName();
         String phoneNumber = contactDBS.getPhone();
@@ -98,7 +82,7 @@ public class ContactFragment extends Fragment {
         WeakReference<ContactFragment> weakReference;
 
         ReadDb(ContactFragment contactFrag) {
-            weakReference = new WeakReference(contactFrag);
+            weakReference = new WeakReference<>(contactFrag);
 
         }
 
@@ -113,8 +97,29 @@ public class ContactFragment extends Fragment {
                     List<ContactDB> contactDBS = ContactDB.find(ContactDB.class, "ids = ?", idsArg);
                     if (contactDBS.size() != 0) {
                         contactFragment.contactDBS = contactDBS.get(0);
-                        contactFragment.handl.sendEmptyMessage(contactFragment.DATA_READ);
+                        contactFragment.handl.sendEmptyMessage(DATA_READ);
                     }
+                }
+            }
+        }
+    }
+
+    static class IncomingHandler extends Handler {
+
+        WeakReference<ContactFragment> weakReference;
+
+        IncomingHandler(ContactFragment contactFragment) {
+            weakReference = new WeakReference<>(contactFragment);
+        }
+
+        public void handleMessage(@NonNull Message msg) {
+
+            ContactFragment contactFragment = weakReference.get();
+            if (contactFragment != null) {
+                switch (msg.what) {
+                    case DATA_READ:
+                        contactFragment.setData();
+                        break;
                 }
             }
         }

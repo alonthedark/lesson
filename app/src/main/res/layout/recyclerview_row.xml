@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:layout_marginLeft="5dp"
         android:layout_weight="1"
-        android:gravity="left|center"
+        android:gravity="start|center"
         android:paddingTop="5dp"
         android:paddingEnd="5dp"
         android:textAlignment="viewStart"

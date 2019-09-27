@@ -15,16 +15,16 @@ import java.util.List;
 
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder> {
 
+    private static final String LOG_TAG = "Adapter";
     private List<ContactDB> contactDBS;
     private LayoutInflater mInflater;
-    private OnCliclListner mOnCliclListner;
+    private OnClickListner mOnClickListner;
     private ContactDB contact;
-    private static final String LOG_TAG = "Adapter";
 
     // data is passed into the constructor
-    ContactListAdapter(Context context, OnCliclListner onCliclListner, List<ContactDB> contactDBS) {
+    ContactListAdapter(Context context, OnClickListner onClickListner, List<ContactDB> contactDBS) {
         this.mInflater = LayoutInflater.from(context);
-        this.mOnCliclListner = onCliclListner;
+        this.mOnClickListner = onClickListner;
         this.contactDBS = contactDBS;
     }
 
@@ -33,7 +33,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.recyclerview_row, parent, false);
-        return new ViewHolder(view, mOnCliclListner);
+        return new ViewHolder(view, mOnClickListner);
     }
 
     // binds the data to the TextView in each row
@@ -51,15 +51,20 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     }
 
 
-    // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView myTextView;
-        OnCliclListner onCliclListner;
+    // parent activity will implement this method to respond to click events
+    public interface OnClickListner {
+        void onItemClick(int position);
+    }
 
-        ViewHolder(View itemView, OnCliclListner onCliclListner) {
+    // stores and recycles views as they are scrolled off screen
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView myTextView;
+        OnClickListner onClickListner;
+
+        ViewHolder(View itemView, OnClickListner onClickListner) {
             super(itemView);
             myTextView = itemView.findViewById(R.id.name);
-            this.onCliclListner = onCliclListner;
+            this.onClickListner = onClickListner;
             itemView.setOnClickListener(this);
         }
 
@@ -67,15 +72,10 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         public void onClick(View view) {
             int posit = getAdapterPosition();
             if (posit != RecyclerView.NO_POSITION) {
-                onCliclListner.onItemClick(getAdapterPosition());
+                onClickListner.onItemClick(getAdapterPosition());
             } else {
                 Log.i(LOG_TAG, "Get position no position");
             }
         }
-    }
-
-    // parent activity will implement this method to respond to click events
-    public interface OnCliclListner {
-        void onItemClick(int position);
     }
 }

@@ -6,7 +6,7 @@ import android.util.Log;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
-public class MainActivity extends FragmentActivity implements ContactListAdapter.OnCliclListner {
+public class MainActivity extends FragmentActivity implements ContactListAdapter.OnClickListner {
 
     ContactListFragment contactListFragment;
     ContactFragment contactFragment;

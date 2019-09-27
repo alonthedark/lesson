@@ -1,7 +1,6 @@
 package com.example.lesson;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -17,13 +16,12 @@ import java.util.List;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ContactListFragment extends Fragment implements ContactListAdapter.OnCliclListner{
+public class ContactListFragment extends Fragment implements ContactListAdapter.OnClickListner {
 
     Handler handler;
     private ContactListFragment contactListFragment = this;
@@ -33,34 +31,21 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
     private static final String TAG = "ContactList";
     private List<ContactDB> contactDBList;
     private Context context;
-    private Activity activity;
     private RecyclerView recyclerView;
     private Thread thContactReceive;
     private Thread trReadDb;
 
-    ContactListFragment(){
+    public ContactListFragment() {
 
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activity = getActivity();
         context = getActivity();
 
-        handler = new Handler() {
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case CONTACT_READ:
-                        trReadDb = new Thread(new ReadContactDb(contactListFragment));
-                        trReadDb.start();
-                        break;
-                    case DB_READ:
-                        setAdapter(recyclerView,contactDBList);
-                        break;
-                }
-            }
-        };
+        handler = new IncomingHandler(contactListFragment);
+
     }
 
     @Override
@@ -109,7 +94,6 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
                     // permission denied
                     Log.d(TAG, "Permission is not granted");
                 }
-                return;
         }
     }
 
@@ -137,7 +121,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         WeakReference<ContactListFragment> weakReference;
 
         ContactReceive(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference(contactListFragment);
+            weakReference = new WeakReference<>(contactListFragment);
         }
 
         @Override
@@ -145,7 +129,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
             if (!Thread.interrupted()) {
                 ContactListFragment contactListFragment = weakReference.get();
                 if (contactListFragment != null) {
-                    ReadContact readContact = new ReadContact(contactListFragment.activity, contactListFragment.context, contactListFragment.contactListFragment);
+                    ReadContact readContact = new ReadContact(contactListFragment.contactListFragment);
                     readContact.readContacts(contactListFragment.context);
                 }
             }
@@ -157,7 +141,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         WeakReference<ContactListFragment> weakReference;
 
         ReadContactDb(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference(contactListFragment);
+            weakReference = new WeakReference<>(contactListFragment);
         }
 
         @Override
@@ -166,7 +150,32 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
                 ContactListFragment contactListFragment = weakReference.get();
                 if (contactListFragment != null) {
                     contactListFragment.contactDBList = ContactDB.listAll(ContactDB.class);
-                    contactListFragment.handler.sendEmptyMessage(contactListFragment.DB_READ);
+                    contactListFragment.handler.sendEmptyMessage(DB_READ);
+                }
+            }
+        }
+    }
+
+    static class IncomingHandler extends Handler {
+
+        WeakReference<ContactListFragment> weakReference;
+
+        IncomingHandler(ContactListFragment contactListFragment) {
+            weakReference = new WeakReference<>(contactListFragment);
+        }
+
+        public void handleMessage(@NonNull Message msg) {
+
+            ContactListFragment contactListFragment = weakReference.get();
+            if (contactListFragment != null) {
+                switch (msg.what) {
+                    case CONTACT_READ:
+                        contactListFragment.trReadDb = new Thread(new ReadContactDb(contactListFragment));
+                        contactListFragment.trReadDb.start();
+                        break;
+                    case DB_READ:
+                        contactListFragment.setAdapter(contactListFragment.recyclerView, contactListFragment.contactDBList);
+                        break;
                 }
             }
         }

@@ -11,9 +11,8 @@ import java.util.List;
 
 class ReadContact {
     private static final String TAG = "Permission contact";
-    private Context context;
+
     private List<Contact> contacts = new ArrayList<>();
-    private Activity activity;
     private Cursor cursor;
     private Cursor pCur;
     private Cursor emailCu;
@@ -21,9 +20,7 @@ class ReadContact {
     private int ids = 0;
 
 
-    ReadContact(Activity activity, Context context, ContactListFragment contactListFragment) {
-        this.context = context;
-        this.activity = activity;
+    ReadContact(ContactListFragment contactListFragment) {
         this.contactListFragment = contactListFragment;
         ContactDB.deleteAll(ContactDB.class);
     }
@@ -36,7 +33,7 @@ class ReadContact {
             cursor = context.getContentResolver().query(
                     ContactsContract.Contacts.CONTENT_URI,
                     null, null, null, null);
-            if (cursor.getCount() > 0) {
+            if ((cursor != null ? cursor.getCount() : 0) > 0) {
                 while (cursor.moveToNext()) {
                     contact = new Contact();
                     String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
@@ -44,10 +41,10 @@ class ReadContact {
                     String name = cursor.getString(cursor.getColumnIndex(
                             ContactsContract.Contacts.DISPLAY_NAME));
 
-                    String has_phone = cursor.getString(cursor.getColumnIndex(
+                    String hasPhone = cursor.getString(cursor.getColumnIndex(
                             ContactsContract.Contacts.HAS_PHONE_NUMBER));
 
-                    if (Integer.parseInt(has_phone) > 0) {
+                    if (Integer.parseInt(hasPhone) > 0) {
                         // extract phone number
 
                         contact.setIds(String.valueOf(ids));
@@ -87,9 +84,15 @@ class ReadContact {
                 }
             }
         } finally {
-            cursor.close();
-            emailCu.close();
-            pCur.close();
+            if (cursor != null) {
+                cursor.close();
+            }
+            if (emailCu != null) {
+                emailCu.close();
+            }
+            if (pCur != null) {
+                pCur.close();
+            }
         }
 
         for (int i = 0; i < contacts.size(); i++) {
@@ -100,7 +103,7 @@ class ReadContact {
                     contacts.get(i).getEmail());
             contactDB.save();
         }
-        contactListFragment.handler.sendEmptyMessage(contactListFragment.CONTACT_READ);
+        contactListFragment.handler.sendEmptyMessage(ContactListFragment.CONTACT_READ);
     }
 
 }

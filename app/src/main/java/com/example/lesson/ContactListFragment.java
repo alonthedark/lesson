@@ -34,6 +34,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
     private RecyclerView recyclerView;
     private Thread thContactReceive;
     private Thread trReadDb;
+    private ContactListAdapter adapter;
 
     public ContactListFragment() {
 
@@ -43,7 +44,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-
+        setRetainInstance(true);
         handler = new IncomingHandler(contactListFragment);
 
     }
@@ -57,6 +58,10 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         recyclerView.setClickable(true);
         if (savedInstanceState == null) {
             permissionGranted();
+        }
+        else {
+            trReadDb = new Thread(new ReadContactDb(this));
+            trReadDb.start();
         }
 
         return view;
@@ -104,7 +109,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
 
     private void setAdapter(RecyclerView recycler, List<ContactDB> contactDBS) {
         Log.d(TAG, "adapter");
-        ContactListAdapter adapter = new ContactListAdapter(context, this, contactDBS);
+        adapter = new ContactListAdapter(context, this, contactDBS);
         recycler.setAdapter(adapter);
     }
 
@@ -127,10 +132,10 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         @Override
         public void run() {
             if (!Thread.interrupted()) {
-                ContactListFragment contactListFragment = weakReference.get();
-                if (contactListFragment != null) {
-                    ReadContact readContact = new ReadContact(contactListFragment.contactListFragment);
-                    readContact.readContacts(contactListFragment.context);
+                ContactListFragment fragment = weakReference.get();
+                if (fragment != null) {
+                    ReadContact readContact = new ReadContact(fragment.contactListFragment);
+                    readContact.readContacts(fragment.context);
                 }
             }
         }
@@ -147,10 +152,10 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         @Override
         public void run() {
             if (!Thread.interrupted()) {
-                ContactListFragment contactListFragment = weakReference.get();
-                if (contactListFragment != null) {
-                    contactListFragment.contactDBList = ContactDB.listAll(ContactDB.class);
-                    contactListFragment.handler.sendEmptyMessage(DB_READ);
+                ContactListFragment fragment = weakReference.get();
+                if (fragment != null) {
+                    fragment.contactDBList = ContactDB.listAll(ContactDB.class);
+                    fragment.handler.sendEmptyMessage(DB_READ);
                 }
             }
         }
@@ -166,15 +171,15 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
 
         public void handleMessage(@NonNull Message msg) {
 
-            ContactListFragment contactListFragment = weakReference.get();
-            if (contactListFragment != null) {
+            ContactListFragment fragment = weakReference.get();
+            if (fragment != null) {
                 switch (msg.what) {
                     case CONTACT_READ:
-                        contactListFragment.trReadDb = new Thread(new ReadContactDb(contactListFragment));
-                        contactListFragment.trReadDb.start();
+                        fragment.trReadDb = new Thread(new ReadContactDb(fragment));
+                        fragment.trReadDb.start();
                         break;
                     case DB_READ:
-                        contactListFragment.setAdapter(contactListFragment.recyclerView, contactListFragment.contactDBList);
+                        fragment.setAdapter(fragment.recyclerView, fragment.contactDBList);
                         break;
                 }
             }

@@ -78,7 +78,6 @@ public class ContactFragment extends Fragment {
 
     static class ReadDb implements Runnable {
 
-
         WeakReference<ContactFragment> weakReference;
 
         ReadDb(ContactFragment contactFrag) {

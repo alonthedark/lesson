@@ -27,7 +27,6 @@ public class MainActivity extends FragmentActivity implements ContactListAdapter
 
     @Override
     public void onItemClick(int position) {
-
         Bundle bundle = new Bundle();
         bundle.putInt("position", position);
         contactFragment = new ContactFragment();

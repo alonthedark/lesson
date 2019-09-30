@@ -25,9 +25,8 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
     private Context context;
     private MainPresenter presenter;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
-    private ContactListFragment contactListFragment = this;
     private ContactListAdapter adapter;
-
+    private List<ContactDB> contactDBList;
 
     public ContactListFragment() {
 
@@ -38,6 +37,7 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
         super.onCreate(savedInstanceState);
         context = getActivity();
         presenter = new MainPresenter();
+        presenter.attachContactListView(this);
     }
 
     @Override
@@ -47,18 +47,22 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
-        presenter.attachContactListView(contactListFragment);
-        if (savedInstanceState == null) {
-            permissionGranted();
-        }
-
+        permissionGranted();
         return view;
     }
 
     public void setAdapter(List<ContactDB> contactDBS) {
         Log.d(TAG, "adapter");
-        adapter = new ContactListAdapter(context, this, contactDBS);
+        this.contactDBList = contactDBS;
+        adapter = new ContactListAdapter(context, this, contactDBList);
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.detachContactListView();
+
     }
 
     @Override
@@ -96,6 +100,7 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
                     // permission denied
                     Log.d(TAG, "Permission is not granted");
                 }
+                break;
         }
     }
 }

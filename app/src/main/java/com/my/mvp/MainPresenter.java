@@ -12,17 +12,6 @@ public class MainPresenter {
     private ContactListView contactListView;
     private ContactModel model;
 
-    public MainPresenter(FragmentView fragmentView) {
-        this.fragView = fragmentView;
-
-    }
-
-/*    public MainPresenter(ContactListView contactListView){
-        this.contactListView = contactListView;
-        this.model = new ContactModel();
-        Log.d(TAG, "Constructor");
-    }*/
-
     public MainPresenter(){
 
         Log.d(TAG, "Constructor");
@@ -33,9 +22,17 @@ public class MainPresenter {
         this.model = new ContactModel();
     }
 
+    public void detachContactView(){
+        this.fragView = null;
+    }
+
     public void attachContactListView(ContactListView contactListView){
         this.contactListView = contactListView;
         this.model = new ContactModel();
+    }
+
+    public void detachContactListView(){
+        this.contactListView = null;
     }
 
     public void reciveOneContact(int id){

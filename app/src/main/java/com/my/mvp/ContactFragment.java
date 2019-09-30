@@ -15,7 +15,6 @@ import androidx.fragment.app.Fragment;
 public class ContactFragment extends Fragment implements FragmentView {
 
     private ContactDB contactDBS;
-    private final static int DATA_READ = 1;
     private static final String LOG_TAG = "ContactFragment";
     private static final String KEY_POSITION = "position";
     private ImageView avatar;
@@ -24,7 +23,7 @@ public class ContactFragment extends Fragment implements FragmentView {
     private TextView email;
     private int id;
     private MainPresenter presenter;
-    private Handler handl;
+
 
     public ContactFragment() {
 
@@ -40,6 +39,12 @@ public class ContactFragment extends Fragment implements FragmentView {
         } else {
             Log.i(LOG_TAG, "getArgument is null");
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.detachContactView();
     }
 
     @Override

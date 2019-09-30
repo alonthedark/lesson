@@ -47,7 +47,6 @@ public class ContactModel {
         contactReceive.start();
     }
 
-
     static class ContactReceive implements Runnable {
 
         Context context;
@@ -140,6 +139,7 @@ public class ContactModel {
                         break;
                     case CONTACT_RECIVED:
                         model.contactReceived();
+                        break;
                 }
             }
         }

@@ -44,7 +44,6 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-        setRetainInstance(true);
         handler = new IncomingHandler(contactListFragment);
 
     }
@@ -56,14 +55,7 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
-        if (savedInstanceState == null) {
-            permissionGranted();
-        }
-        else {
-            trReadDb = new Thread(new ReadContactDb(this));
-            trReadDb.start();
-        }
-
+        permissionGranted();
         return view;
     }
 

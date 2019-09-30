@@ -4,16 +4,10 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.lang.ref.WeakReference;
-import java.util.List;
-import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -21,20 +15,18 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ContactListFragment extends Fragment implements ContactListAdapter.OnClickListner {
+import java.util.List;
+import java.util.Objects;
 
-    Handler handler;
-    private ContactListFragment contactListFragment = this;
-    final static int CONTACT_READ = 0;
-    private final static int DB_READ = 1;
-    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
-    private static final String TAG = "ContactList";
-    private List<ContactDB> contactDBList;
-    private Context context;
+public class ContactListFragment extends Fragment implements ContactListView, ContactListAdapter.OnClickListner {
+
     private RecyclerView recyclerView;
-    private Thread thContactReceive;
-    private Thread trReadDb;
+    private static final String TAG = "contact list";
+    private Context context;
+    private MainPresenter presenter;
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     private ContactListAdapter adapter;
+    private List<ContactDB> contactDBList;
 
     public ContactListFragment() {
 
@@ -44,8 +36,8 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-        handler = new IncomingHandler(contactListFragment);
-
+        presenter = new MainPresenter();
+        presenter.attachContactListView(this);
     }
 
     @Override
@@ -59,13 +51,31 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
         return view;
     }
 
+    public void setAdapter(List<ContactDB> contactDBS) {
+        Log.d(TAG, "adapter");
+        this.contactDBList = contactDBS;
+        adapter = new ContactListAdapter(context, this, contactDBList);
+        recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.detachContactListView();
+
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        ((MainActivity) Objects.requireNonNull(getActivity())).onItemClick(position);
+    }
+
     private void permissionGranted() {
         if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
             Log.d(TAG, "Permission is granted");
-            thContactReceive = new Thread(new ContactReceive(contactListFragment));
-            thContactReceive.start();
+            presenter.readContacts(context);
         } else {
             // Разрешений нет
             Log.d(TAG, "Permission is not granted");
@@ -85,100 +95,12 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
                 if (ContextCompat.checkSelfPermission(context,
                         Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                     // permission granted
-                    thContactReceive = new Thread(new ContactReceive(contactListFragment));
-                    thContactReceive.start();
+                    presenter.readContacts(context);
                 } else {
                     // permission denied
                     Log.d(TAG, "Permission is not granted");
                 }
-        }
-    }
-
-    @Override
-    public void onItemClick(int position) {
-        ((MainActivity) Objects.requireNonNull(getActivity())).onItemClick(position);
-    }
-
-    private void setAdapter(RecyclerView recycler, List<ContactDB> contactDBS) {
-        Log.d(TAG, "adapter");
-        adapter = new ContactListAdapter(context, this, contactDBS);
-        recycler.setAdapter(adapter);
-    }
-
-    @Override
-    public void onDestroy() {
-        handler.removeCallbacksAndMessages(null);
-        super.onDestroy();
-        if(thContactReceive !=null) {
-            thContactReceive.interrupt();
-        }
-        if(trReadDb != null) {
-            trReadDb.interrupt();
-        }
-    }
-
-    static class ContactReceive implements Runnable {
-
-        WeakReference<ContactListFragment> weakReference;
-
-        ContactReceive(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference<>(contactListFragment);
-        }
-
-        @Override
-        public void run() {
-            if (!Thread.interrupted()) {
-                ContactListFragment fragment = weakReference.get();
-                if (fragment != null) {
-                    ReadContact readContact = new ReadContact(fragment.contactListFragment);
-                    readContact.readContacts(fragment.context);
-                }
-            }
-        }
-    }
-
-    static class ReadContactDb implements Runnable {
-
-        WeakReference<ContactListFragment> weakReference;
-
-        ReadContactDb(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference<>(contactListFragment);
-        }
-
-        @Override
-        public void run() {
-            if (!Thread.interrupted()) {
-                ContactListFragment fragment = weakReference.get();
-                if (fragment != null) {
-                    fragment.contactDBList = ContactDB.listAll(ContactDB.class);
-                    fragment.handler.sendEmptyMessage(DB_READ);
-                }
-            }
-        }
-    }
-
-    static class IncomingHandler extends Handler {
-
-        WeakReference<ContactListFragment> weakReference;
-
-        IncomingHandler(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference<>(contactListFragment);
-        }
-
-        public void handleMessage(@NonNull Message msg) {
-
-            ContactListFragment fragment = weakReference.get();
-            if (fragment != null) {
-                switch (msg.what) {
-                    case CONTACT_READ:
-                        fragment.trReadDb = new Thread(new ReadContactDb(fragment));
-                        fragment.trReadDb.start();
-                        break;
-                    case DB_READ:
-                        fragment.setAdapter(fragment.recyclerView, fragment.contactDBList);
-                        break;
-                }
-            }
+                break;
         }
     }
 }

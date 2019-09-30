@@ -2,7 +2,7 @@ package com.example.lesson;
 
 import com.orm.SugarRecord;
 
-public class ContactDB extends SugarRecord<ContactDB>{
+public class ContactDB extends SugarRecord<ContactDB> {
 
     private String name;
     private String phone;

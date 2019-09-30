@@ -1,6 +1,5 @@
 package com.example.lesson;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
@@ -16,13 +15,14 @@ class ReadContact {
     private Cursor cursor;
     private Cursor pCur;
     private Cursor emailCu;
-    private ContactListFragment contactListFragment;
+    private ContactModel contactModel;
     private int ids = 0;
 
 
-    ReadContact(ContactListFragment contactListFragment) {
-        this.contactListFragment = contactListFragment;
+    ReadContact(ContactModel model) {
+        this.contactModel = model;
         ContactDB.deleteAll(ContactDB.class);
+
     }
 
 
@@ -103,8 +103,6 @@ class ReadContact {
                     contacts.get(i).getEmail());
             contactDB.save();
         }
-        contactListFragment.handler.sendEmptyMessage(ContactListFragment.CONTACT_READ);
+        contactModel.handler.sendEmptyMessage(ContactModel.CONTACT_READ);
     }
-
 }
-

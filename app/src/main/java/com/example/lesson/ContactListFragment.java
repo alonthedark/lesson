@@ -109,8 +109,12 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
     public void onDestroy() {
         handler.removeCallbacksAndMessages(null);
         super.onDestroy();
-        thContactReceive.interrupt();
-        trReadDb.interrupt();
+        if(thContactReceive !=null) {
+            thContactReceive.interrupt();
+        }
+        if(trReadDb != null) {
+            trReadDb.interrupt();
+        }
     }
 
     static class ContactReceive implements Runnable {

@@ -73,7 +73,9 @@ public class ContactFragment extends Fragment {
     public void onDestroy() {
         handl.removeCallbacksAndMessages(null);
         super.onDestroy();
-        thread.interrupt();
+        if(thread != null) {
+            thread.interrupt();
+        }
     }
 
     static class ReadDb implements Runnable {

@@ -1,54 +1,33 @@
 package com.example.lesson;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.List;
 
-public class MainPresenter {
+import moxy.InjectViewState;
+import moxy.MvpPresenter;
 
-    private static final String TAG = "Presenter";
-    private FragmentView fragView;
-    private ContactListView contactListView;
+@InjectViewState
+public class MainPresenter extends MvpPresenter<ListView> {
+
     private ContactModel model;
 
-    public MainPresenter(){
-
-        Log.d(TAG, "Constructor");
+    public MainPresenter() {
+        this.model = new ContactModel(this);
     }
 
-    public void attachContactView(FragmentView fragView){
-        this.fragView = fragView;
-        this.model = new ContactModel();
-    }
-
-    public void detachContactView(){
-        this.fragView = null;
-    }
-
-    public void attachContactListView(ContactListView contactListView){
-        this.contactListView = contactListView;
-        this.model = new ContactModel();
-    }
-
-    public void detachContactListView(){
-        this.contactListView = null;
-    }
-
-    public void reciveOneContact(int id){
-        model.receiveContact(this, id);
-    }
-
-    public void displeyContactList(List<ContactDB> contactDBS){
-        contactListView.setAdapter(contactDBS);
+    @Override
+    protected void onFirstViewAttach(){
+        super.onFirstViewAttach();
+        getViewState().permissionGranted();
     }
 
     public void readContacts(Context context){
-        model.startReadContacts(context,this);
+        model.startReadContacts(context);
     }
 
-    public void showContact(ContactDB contactDB){
-        fragView.setData(contactDB);
+    public void displeyContactList(List<ContactDB> contactDBS){
+        getViewState().setAdapter(contactDBS);
     }
 
 }

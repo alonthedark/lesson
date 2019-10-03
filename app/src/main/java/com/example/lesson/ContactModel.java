@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
+import moxy.presenter.InjectPresenter;
+import moxy.presenter.ProvidePresenter;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -13,38 +15,26 @@ public class ContactModel {
 
     private static final String TAG = "model contact";
     private Thread trReadDb;
-    private Thread contactReceive;
     final static int CONTACT_READ = 0;
     private final static int DB_READ = 1;
-    private final static int CONTACT_RECIVED = 2;
     private List<ContactDB> contactDBList;
-    private ContactDB contactDB;
-    private int id;
     Handler handler;
-    private MainPresenter presenter;
+    MainPresenter presenter;
 
-    ContactModel() {
+    ContactModel(MainPresenter mPresenter) {
         handler = new IncomingHandler(this);
+        presenter = mPresenter;
+
     }
 
-    public void startReadContacts(Context context, MainPresenter mPresenter) {
-        this.presenter = mPresenter;
-        Thread thContactReceive = new Thread(new ContactReceive(context,this));
+    public void startReadContacts(Context context) {
+        Thread thContactReceive = new Thread(new ContactReceive(context, this));
         thContactReceive.start();
+
     }
 
-    public void contactRead(){
+    public void contactRead() {
         presenter.displeyContactList(contactDBList);
-    }
-
-    public void contactReceived(){
-        presenter.showContact(contactDB);
-    }
-
-    public void receiveContact(MainPresenter presenter, int id){
-        this.presenter = presenter;
-        contactReceive = new Thread(new ReadOneContadt(this,id));
-        contactReceive.start();
     }
 
     static class ContactReceive implements Runnable {
@@ -52,7 +42,7 @@ public class ContactModel {
         Context context;
         WeakReference<ContactModel> weakReference;
 
-        ContactReceive(Context context,ContactModel contactModel) {
+        ContactReceive(Context context, ContactModel contactModel) {
             this.context = context;
             weakReference = new WeakReference<>(contactModel);
         }
@@ -89,34 +79,6 @@ public class ContactModel {
         }
     }
 
-    static class ReadOneContadt implements Runnable {
-
-        WeakReference<ContactModel> weakReference;
-        int id;
-
-        ReadOneContadt(ContactModel contactModel,int id) {
-            weakReference = new WeakReference<>(contactModel);
-            this.id = id;
-
-        }
-
-        @Override
-        public void run() {
-            if (!Thread.interrupted()) {
-
-                ContactModel contactModel = weakReference.get();
-                if (contactModel != null) {
-                    int ids = id;
-                    String idsArg = String.valueOf(ids);
-                    List<ContactDB> contactDBS = ContactDB.find(ContactDB.class, "ids = ?", idsArg);
-                    if (contactDBS.size() != 0) {
-                        contactModel.contactDB = contactDBS.get(0);
-                        contactModel.handler.sendEmptyMessage(CONTACT_RECIVED);
-                    }
-                }
-            }
-        }
-    }
     static class IncomingHandler extends Handler {
 
         WeakReference<ContactModel> weakReference;
@@ -136,9 +98,6 @@ public class ContactModel {
                         break;
                     case DB_READ:
                         model.contactRead();
-                        break;
-                    case CONTACT_RECIVED:
-                        model.contactReceived();
                         break;
                 }
             }

@@ -9,9 +9,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.fragment.app.Fragment;
+import moxy.MvpAppCompatFragment;
+import moxy.presenter.InjectPresenter;
+import moxy.presenter.ProvidePresenter;
 
-public class ContactFragment extends Fragment implements FragmentView {
+public class ContactFragment extends MvpAppCompatFragment implements ContactView {
+
+    @InjectPresenter
+    ProfilePresenter presenter;
 
     private ContactDB contactDBS;
     private static final String LOG_TAG = "ContactFragment";
@@ -21,7 +26,7 @@ public class ContactFragment extends Fragment implements FragmentView {
     private TextView phone;
     private TextView email;
     private int id;
-    private MainPresenter presenter;
+
 
 
     public ContactFragment() {
@@ -31,19 +36,21 @@ public class ContactFragment extends Fragment implements FragmentView {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new MainPresenter();
-        presenter.attachContactView(this);
         if (getArguments() != null) {
             id = getArguments().getInt(KEY_POSITION);
         } else {
             Log.i(LOG_TAG, "getArgument is null");
         }
     }
+    @ProvidePresenter
+    ProfilePresenter provideMainPresenter(){
+        return new ProfilePresenter();
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        presenter.detachContactView();
+        presenter.detachView(this);
     }
 
     @Override
@@ -54,8 +61,12 @@ public class ContactFragment extends Fragment implements FragmentView {
         name = (TextView) view.findViewById(R.id.name);
         phone = (TextView) view.findViewById(R.id.phone_number);
         email = (TextView) view.findViewById(R.id.email);
-        presenter.reciveOneContact(id);
+
         return view;
+    }
+
+    public void receiveOneContact(){
+        presenter.receiveContact(id);
     }
 
     @SuppressLint("SetTextI18n")

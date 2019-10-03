@@ -9,21 +9,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
 import java.util.Objects;
 
-public class ContactListFragment extends Fragment implements ContactListView, ContactListAdapter.OnClickListner {
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import moxy.MvpAppCompatFragment;
+import moxy.presenter.InjectPresenter;
+import moxy.presenter.ProvidePresenter;
+
+public class ContactListFragment extends MvpAppCompatFragment implements ListView, ContactListAdapter.OnClickListner {
+
+
+    @InjectPresenter
+    MainPresenter mainPresenter;
 
     private RecyclerView recyclerView;
     private static final String TAG = "contact list";
     private Context context;
-    private MainPresenter presenter;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     private ContactListAdapter adapter;
     private List<ContactDB> contactDBList;
@@ -36,8 +41,10 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-        presenter = new MainPresenter();
-        presenter.attachContactListView(this);
+    }
+    @ProvidePresenter
+    MainPresenter provideMainPresenter(){
+        return new MainPresenter();
     }
 
     @Override
@@ -47,7 +54,6 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
-        permissionGranted();
         return view;
     }
 
@@ -61,8 +67,7 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
     @Override
     public void onDestroy() {
         super.onDestroy();
-        presenter.detachContactListView();
-
+        mainPresenter.detachView(this);
     }
 
     @Override
@@ -70,21 +75,21 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
         ((MainActivity) Objects.requireNonNull(getActivity())).onItemClick(position);
     }
 
-    private void permissionGranted() {
+    public void permissionGranted() {
         if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
             Log.d(TAG, "Permission is granted");
-            presenter.readContacts(context);
+            mainPresenter.readContacts(context);
+
         } else {
             // Разрешений нет
             Log.d(TAG, "Permission is not granted");
 
             // Запрос разрешений
             Log.d(TAG, "Request permissions");
-
-            requestPermissions(new String[]{
-                    Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+                    requestPermissions(new String[]{
+                            Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         }
     }
 
@@ -95,7 +100,7 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
                 if (ContextCompat.checkSelfPermission(context,
                         Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                     // permission granted
-                    presenter.readContacts(context);
+                    mainPresenter.readContacts(context);
                 } else {
                     // permission denied
                     Log.d(TAG, "Permission is not granted");
@@ -103,4 +108,5 @@ public class ContactListFragment extends Fragment implements ContactListView, Co
                 break;
         }
     }
+
 }

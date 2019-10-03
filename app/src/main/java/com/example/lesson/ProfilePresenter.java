@@ -1,62 +1,46 @@
 package com.example.lesson;
 
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
-
 import java.util.List;
 
 import moxy.InjectViewState;
 import moxy.MvpPresenter;
 
 @InjectViewState
-public class ProfilePresenter extends MvpPresenter<ContactView> {
+public class ProfilePresenter extends MvpPresenter<ContactView> implements CallBack {
 
     private ContactDB contactDB;
-    private int id;
+    private ModelDetail model;
 
     ProfilePresenter() {
 
     }
-    public void receiveContact(int id){
-        this.id = id;
-        ContactTask contactTask = new ContactTask();
-        contactTask.execute();
 
+    public void receiveContact(int id) {
+        model.receiveContact(this, id);
     }
 
     @Override
-    protected void onFirstViewAttach(){
+    protected void onFirstViewAttach() {
         super.onFirstViewAttach();
+        model = new ModelDetail();
         getViewState().receiveOneContact();
     }
 
-    @SuppressLint("StaticFieldLeak")
-    class ContactTask extends AsyncTask<Void, Void, Void> {
+    @Override
+    public void onDestroy() {
+        model.cancel(this);
+    }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            int ids = id;
-            String idsArg = String.valueOf(ids);
-            List<ContactDB> contactDBS = ContactDB.find(ContactDB.class, "ids = ?", idsArg);
-            if (contactDBS.size() != 0) {
-                contactDB = contactDBS.get(0);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
+    @Override
+    public void onSuccess(List<ContactDB> contactDBList) {
+        if (contactDBList.size() != 0) {
+            contactDB = contactDBList.get(0);
             getViewState().setData(contactDB);
         }
     }
 
+    @Override
+    public void onError(Throwable error) {
 
+    }
 }

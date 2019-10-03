@@ -42,8 +42,12 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         super.onCreate(savedInstanceState);
         context = getActivity();
     }
+
     @ProvidePresenter
     MainPresenter provideMainPresenter(){
+        MainPresenter presenter = new MainPresenter();
+        context = getActivity();
+        //presenter.setContext(context);
         return new MainPresenter();
     }
 

@@ -19,22 +19,22 @@ public class ContactModel {
     private final static int DB_READ = 1;
     private List<ContactDB> contactDBList;
     Handler handler;
-    MainPresenter presenter;
+    private CallBack callBack;
+    //MainPresenter presenter;
 
-    ContactModel(MainPresenter mPresenter) {
+    ContactModel() {
         handler = new IncomingHandler(this);
-        presenter = mPresenter;
-
     }
 
-    public void startReadContacts(Context context) {
+    public void startReadContacts(CallBack callback, Context context) {
+        this.callBack = callback;
         Thread thContactReceive = new Thread(new ContactReceive(context, this));
         thContactReceive.start();
-
     }
 
-    public void contactRead() {
-        presenter.displeyContactList(contactDBList);
+    public void cancel(CallBack callback) {
+        this.callBack = null;
+
     }
 
     static class ContactReceive implements Runnable {
@@ -62,9 +62,11 @@ public class ContactModel {
     static class ReadContactDb implements Runnable {
 
         WeakReference<ContactModel> weakReference;
+        private CallBack cb;
 
-        ReadContactDb(ContactModel contactModel) {
+        ReadContactDb(ContactModel contactModel, CallBack callBack) {
             weakReference = new WeakReference<>(contactModel);
+            this.cb = callBack;
         }
 
         @Override
@@ -73,6 +75,7 @@ public class ContactModel {
                 ContactModel model = weakReference.get();
                 if (model != null) {
                     model.contactDBList = ContactDB.listAll(ContactDB.class);
+                    cb.onSuccess(ContactDB.listAll(ContactDB.class));
                     model.handler.sendEmptyMessage(DB_READ);
                 }
             }
@@ -93,11 +96,8 @@ public class ContactModel {
             if (model != null) {
                 switch (msg.what) {
                     case CONTACT_READ:
-                        model.trReadDb = new Thread(new ReadContactDb(model));
+                        model.trReadDb = new Thread(new ReadContactDb(model, model.callBack));
                         model.trReadDb.start();
-                        break;
-                    case DB_READ:
-                        model.contactRead();
                         break;
                 }
             }

@@ -8,25 +8,35 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
+
 class ReadContact {
-    private static final String TAG = "Permission contact";
+    private static final String TAG = "ReadContact";
 
     private List<Contact> contacts = new ArrayList<>();
     private Cursor cursor;
     private Cursor pCur;
     private Cursor emailCu;
-    private ContactModel contactModel;
     private int ids = 0;
+    Context context;
 
 
-    ReadContact(ContactModel model) {
-        this.contactModel = model;
+    ReadContact(Context context) {
+        this.context = context;
         ContactDB.deleteAll(ContactDB.class);
-
     }
 
+    Observable<Contact> getContactObs(){
+        return Observable.fromIterable(readContacts(context)).subscribeOn(Schedulers.computation());
+    }
 
-    void readContacts(Context context) {
+    Single<List<Contact>> getContactList(){
+        return Single.just(readContacts(context)).subscribeOn(Schedulers.computation());
+    }
+
+    List<Contact> readContacts(Context context) {
         Contact contact;
 
         try {
@@ -94,15 +104,9 @@ class ReadContact {
                 pCur.close();
             }
         }
-
-        for (int i = 0; i < contacts.size(); i++) {
-            ContactDB contactDB = new ContactDB(
-                    contacts.get(i).getName(),
-                    contacts.get(i).getPhone(),
-                    contacts.get(i).getIds(),
-                    contacts.get(i).getEmail());
-            contactDB.save();
-        }
-        contactModel.handler.sendEmptyMessage(ContactModel.CONTACT_READ);
+        //disposable = Observable.fromIterable(contacts).subscribeOn(Schedulers.io())
+                //.subscribe(contactEl -> saveContactDb(contactEl),throwable -> Log.d(TAG, "onError"),);
+        //.handler.sendEmptyMessage(ContactModel.CONTACT_READ);
+        return contacts;
     }
 }

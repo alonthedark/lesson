@@ -1,6 +1,8 @@
 package com.example.lesson;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -8,19 +10,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import java.util.List;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import moxy.MvpAppCompatFragment;
 import moxy.presenter.InjectPresenter;
 import moxy.presenter.ProvidePresenter;
 
-public class ContactListFragment extends MvpAppCompatFragment implements ListView, ContactListAdapter.OnClickListner {
+public class ContactListFragment extends MvpAppCompatFragment implements ListView, ContactListAdapter.OnClickListener {
 
 
     @InjectPresenter
@@ -32,6 +36,10 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     private ContactListAdapter adapter;
     private List<ContactDB> contactDBList;
+    private List<Contact> contactList;
+    private SearchView searchView;
+    SearchManager searchManager;
+    private Activity activity;
 
     public ContactListFragment() {
 
@@ -41,13 +49,15 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
+        adapter = new ContactListAdapter(context, this, contactDBList);
+        setHasOptionsMenu(true);
+
     }
 
     @ProvidePresenter
-    MainPresenter provideMainPresenter(){
+    MainPresenter provideMainPresenter() {
         MainPresenter presenter = new MainPresenter();
         context = getActivity();
-        //presenter.setContext(context);
         return new MainPresenter();
     }
 
@@ -58,13 +68,33 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
+        searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) view.findViewById(R.id.contact_search);
         return view;
     }
 
     public void setAdapter(List<ContactDB> contactDBS) {
         Log.d(TAG, "adapter");
         this.contactDBList = contactDBS;
-        adapter = new ContactListAdapter(context, this, contactDBList);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // фильтруем recycler view при окончании ввода
+                adapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // фильтруем recycler view при изменении текста
+                adapter.getFilter().filter(query);
+                return false;
+            }
+        });
+        adapter.setData(contactDBList);
+        recyclerView.addItemDecoration(new ItemDecoration(context, DividerItemDecoration.VERTICAL, 30));
         recyclerView.setAdapter(adapter);
     }
 
@@ -92,10 +122,11 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
 
             // Запрос разрешений
             Log.d(TAG, "Request permissions");
-                    requestPermissions(new String[]{
-                            Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
+            requestPermissions(new String[]{
+                    Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

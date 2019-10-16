@@ -3,8 +3,15 @@ package com.example.lesson;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import moxy.presenter.InjectPresenter;
 import moxy.presenter.ProvidePresenter;
 
@@ -14,94 +21,45 @@ import java.util.List;
 public class ContactModel {
 
     private static final String TAG = "model contact";
-    private Thread trReadDb;
-    final static int CONTACT_READ = 0;
-    private final static int DB_READ = 1;
+    private List<Contact> contactList;
     private List<ContactDB> contactDBList;
-    Handler handler;
-    private CallBack callBack;
-    //MainPresenter presenter;
+    private Context context;
+    Disposable disposable;
+    ReadContact readContact;
 
     ContactModel() {
-        handler = new IncomingHandler(this);
     }
 
-    public void startReadContacts(CallBack callback, Context context) {
-        this.callBack = callback;
-        Thread thContactReceive = new Thread(new ContactReceive(context, this));
-        thContactReceive.start();
+    public void startReadContacts(Context context) {
+        readContact = new ReadContact(context);
     }
 
-    public void cancel(CallBack callback) {
-        this.callBack = null;
-
+    public void saveDataBase(List<Contact> list){
+        disposable = saveContactDb(list).subscribe(contact -> saveContactDBS(contact));
     }
 
-    static class ContactReceive implements Runnable {
-
-        Context context;
-        WeakReference<ContactModel> weakReference;
-
-        ContactReceive(Context context, ContactModel contactModel) {
-            this.context = context;
-            weakReference = new WeakReference<>(contactModel);
-        }
-
-        @Override
-        public void run() {
-            if (!Thread.interrupted()) {
-                ContactModel model = weakReference.get();
-                if (model != null) {
-                    ReadContact readContact = new ReadContact(model);
-                    readContact.readContacts(context);
-                }
-            }
-        }
+    Observable<List<Contact>> contactObservable(Context context){
+        return Observable.just(readContact.readContacts(context)).subscribeOn(Schedulers.computation());
     }
 
-    static class ReadContactDb implements Runnable {
 
-        WeakReference<ContactModel> weakReference;
-        private CallBack cb;
-
-        ReadContactDb(ContactModel contactModel, CallBack callBack) {
-            weakReference = new WeakReference<>(contactModel);
-            this.cb = callBack;
-        }
-
-        @Override
-        public void run() {
-            if (!Thread.interrupted()) {
-                ContactModel model = weakReference.get();
-                if (model != null) {
-                    model.contactDBList = ContactDB.listAll(ContactDB.class);
-                    cb.onSuccess(ContactDB.listAll(ContactDB.class));
-                    model.handler.sendEmptyMessage(DB_READ);
-                }
-            }
-        }
+    Observable<Contact> saveContactDb(List<Contact> list){
+        return Observable.fromIterable(list).subscribeOn(Schedulers.io());
     }
 
-    static class IncomingHandler extends Handler {
-
-        WeakReference<ContactModel> weakReference;
-
-        IncomingHandler(ContactModel model) {
-            weakReference = new WeakReference<>(model);
-        }
-
-        public void handleMessage(@NonNull Message msg) {
-
-            ContactModel model = weakReference.get();
-            if (model != null) {
-                switch (msg.what) {
-                    case CONTACT_READ:
-                        model.trReadDb = new Thread(new ReadContactDb(model, model.callBack));
-                        model.trReadDb.start();
-                        break;
-                }
-            }
-        }
+    public void saveContactDBS(Contact contact){
+        ContactDB contactDB = new ContactDB(
+                contact.getName(),
+                contact.getPhone(),
+                contact.getIds(),
+                contact.getEmail());
+        contactDB.save();
     }
+
+    Single<List<ContactDB>> getContactDbList(){
+        return Single.just(ContactDB.listAll(ContactDB.class))
+                .subscribeOn(Schedulers.io());
+    }
+
 }
 

@@ -1,22 +1,11 @@
 package com.example.lesson;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
-import androidx.annotation.NonNull;
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import moxy.presenter.InjectPresenter;
-import moxy.presenter.ProvidePresenter;
-
-import java.lang.ref.WeakReference;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 
 public class ContactModel {
 
@@ -24,8 +13,7 @@ public class ContactModel {
     private List<Contact> contactList;
     private List<ContactDB> contactDBList;
     private Context context;
-    Disposable disposable;
-    ReadContact readContact;
+    private ReadContact readContact;
 
     ContactModel() {
     }
@@ -34,32 +22,35 @@ public class ContactModel {
         readContact = new ReadContact(context);
     }
 
-    public void saveDataBase(List<Contact> list){
-        disposable = saveContactDb(list).subscribe(contact -> saveContactDBS(contact));
+    Observable<List<ContactDB>> getFilteredContacts(String search){
+        if(search.isEmpty()){
+            return Observable.fromCallable(() -> ContactDB.listAll(ContactDB.class)).subscribeOn(Schedulers.io());
+        }
+        else {
+            return Observable.fromCallable(() -> ContactDB.findWithQuery(ContactDB.class,"Select * from CONTACT_DB where name LIKE ?", "%"+search+"%"))
+                    .subscribeOn(Schedulers.io());
+
+        }
     }
 
-    Observable<List<Contact>> contactObservable(Context context){
-        return Observable.just(readContact.readContacts(context)).subscribeOn(Schedulers.computation());
+    Observable<List<ContactDB>> contactObservable(Context context) {
+        return Observable.fromCallable(() -> readContact.readContacts(context))
+                .concatMap(contacts -> {
+                    saveDb(contacts);
+                    return Observable.fromCallable(() -> ContactDB.listAll(ContactDB.class)).subscribeOn(Schedulers.io());
+                })
+                .subscribeOn(Schedulers.computation());
     }
 
-
-    Observable<Contact> saveContactDb(List<Contact> list){
-        return Observable.fromIterable(list).subscribeOn(Schedulers.io());
+    private void saveDb(List<Contact> list) {
+        for (int i = 0; i < list.size(); i++) {
+            ContactDB contactDB = new ContactDB(
+                    list.get(i).getName(),
+                    list.get(i).getPhone(),
+                    list.get(i).getIds(),
+                    list.get(i).getEmail());
+            contactDB.save();
+        }
     }
-
-    public void saveContactDBS(Contact contact){
-        ContactDB contactDB = new ContactDB(
-                contact.getName(),
-                contact.getPhone(),
-                contact.getIds(),
-                contact.getEmail());
-        contactDB.save();
-    }
-
-    Single<List<ContactDB>> getContactDbList(){
-        return Single.just(ContactDB.listAll(ContactDB.class))
-                .subscribeOn(Schedulers.io());
-    }
-
 }
 

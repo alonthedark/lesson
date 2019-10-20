@@ -28,14 +28,6 @@ class ReadContact {
         ContactDB.deleteAll(ContactDB.class);
     }
 
-    Observable<Contact> getContactObs(){
-        return Observable.fromIterable(readContacts(context)).subscribeOn(Schedulers.computation());
-    }
-
-    Single<List<Contact>> getContactList(){
-        return Single.just(readContacts(context)).subscribeOn(Schedulers.computation());
-    }
-
     List<Contact> readContacts(Context context) {
         Contact contact;
 
@@ -104,9 +96,6 @@ class ReadContact {
                 pCur.close();
             }
         }
-        //disposable = Observable.fromIterable(contacts).subscribeOn(Schedulers.io())
-                //.subscribe(contactEl -> saveContactDb(contactEl),throwable -> Log.d(TAG, "onError"),);
-        //.handler.sendEmptyMessage(ContactModel.CONTACT_READ);
         return contacts;
     }
 }

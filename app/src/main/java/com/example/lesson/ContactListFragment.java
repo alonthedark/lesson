@@ -10,7 +10,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +40,9 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     private List<ContactDB> contactDBList;
     private List<Contact> contactList;
     private SearchView searchView;
-    SearchManager searchManager;
+    private ProgressBar progressBar;
+    private SearchManager searchManager;
+    private TextView loadContactInfo;
     private Activity activity;
 
     public ContactListFragment() {
@@ -66,6 +70,8 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.contact_list, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
+        loadContactInfo = (TextView) view.findViewById(R.id.loadContactInfo);
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
         searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
@@ -81,15 +87,13 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // фильтруем recycler view при окончании ввода
-                adapter.getFilter().filter(query);
+                mainPresenter.searchContact(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String query) {
-                // фильтруем recycler view при изменении текста
-                adapter.getFilter().filter(query);
+                mainPresenter.searchContact(query);
                 return false;
             }
         });
@@ -127,7 +131,6 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -144,4 +147,19 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         }
     }
 
+    public void startProgress(){
+        progressBar.setVisibility(ProgressBar.VISIBLE);
+        loadContactInfo.setVisibility(TextView.VISIBLE);
+
+    }
+
+    public void hideProgress(){
+        searchView.setVisibility(SearchView.VISIBLE);
+        progressBar.setVisibility(ProgressBar.GONE);
+        loadContactInfo.setVisibility(TextView.GONE);
+    }
+
+    public void setNewData(List<ContactDB> contactDBList){
+        adapter.setResult(contactDBList);
+    }
 }

@@ -17,9 +17,12 @@ public interface ListView extends MvpView {
     @StateStrategyType(SkipStrategy.class)
     void permissionGranted();
 
-/*    @StateStrategyType(OneExecutionStateStrategy.class)
+    @StateStrategyType(SkipStrategy.class)
     void startProgress();
 
-    @StateStrategyType(OneExecutionStateStrategy.class)
-    void stopProgress();*/
+    @StateStrategyType(AddToEndSingleStrategy.class)
+    void hideProgress();
+
+    @StateStrategyType(AddToEndSingleStrategy.class)
+    void setNewData(List<ContactDB> contactDBList);
 }

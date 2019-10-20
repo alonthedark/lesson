@@ -1,5 +1,7 @@
 package com.example.lesson;
 
+import java.util.List;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import moxy.InjectViewState;
@@ -18,7 +20,7 @@ public class ProfilePresenter extends MvpPresenter<ContactView> {
 
     public void receiveContact(int id) {
         disposable = model.getContact(id).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(contactDB1 -> getViewState().setData(contactDB1));
+                .subscribe(contactDB1 -> getViewState().setData(contactDB1.get(0)));
     }
 
     @Override

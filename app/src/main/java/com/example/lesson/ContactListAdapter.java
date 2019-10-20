@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder> implements Filterable {
+public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder> {
 
     private static final String LOG_TAG = "Adapter";
     private List<ContactDB> contactDBS;
@@ -67,39 +67,11 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         this.displayedList = this.contactDBS;
     }
 
-
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-                String charString = charSequence.toString();
-
-                if (charString.isEmpty()) {
-                    mFilteredList = contactDBS;
-                } else {
-                    ArrayList<ContactDB> filteredList = new ArrayList<>();
-                    for (ContactDB contactDB : contactDBS) {
-                        if (contactDB.getName().toLowerCase().contains(charString)) {
-                            filteredList.add(contactDB);
-                        }
-                    }
-                    mFilteredList = filteredList;
-                }
-
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = mFilteredList;
-                return filterResults;
-            }
-
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                DiffUtilCallBack diffUtilCallBack = new DiffUtilCallBack(displayedList, mFilteredList);
-                DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffUtilCallBack);
-                adapter.displayedList = mFilteredList;
-                diffResult.dispatchUpdatesTo(adapter);
-            }
-        };
+    public void setResult(List<ContactDB> newList){
+        DiffUtilCallBack diffUtilCallBack = new DiffUtilCallBack(displayedList, newList);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffUtilCallBack);
+        adapter.displayedList = newList;
+        diffResult.dispatchUpdatesTo(adapter);
     }
 
     // parent activity will implement this method to respond to click events

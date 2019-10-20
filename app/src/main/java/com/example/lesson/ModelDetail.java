@@ -15,8 +15,8 @@ public class ModelDetail {
 
     }
 
-    Observable<ContactDB> getContact(int id){
-        return Observable.fromIterable(ContactDB.find(ContactDB.class, "ids = ?", String.valueOf(id)))
+    Observable<List<ContactDB>> getContact(int id){
+        return Observable.fromCallable(() -> ContactDB.find(ContactDB.class, "ids = ?", String.valueOf(id)))
                 .subscribeOn(Schedulers.io());
     }
 }

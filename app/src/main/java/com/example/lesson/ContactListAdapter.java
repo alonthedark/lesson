@@ -5,34 +5,29 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.AsyncListDiffer;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder> {
 
     private static final String LOG_TAG = "Adapter";
-    private List<ContactDB> contactDBS;
-    public List<ContactDB> displayedList;
-    private List<ContactDB> mFilteredList;
     private LayoutInflater mInflater;
     private OnClickListener mOnClickListner;
     private ContactDB contact;
     private ContactListAdapter adapter = this;
+    AsyncListDiffer<ContactDB> differ;
 
     // data is passed into the constructor
-    ContactListAdapter(Context context, OnClickListener onClickListener, List<ContactDB> contactDBS) {
+    ContactListAdapter(Context context, OnClickListener onClickListener) {
         this.mInflater = LayoutInflater.from(context);
         this.mOnClickListner = onClickListener;
-        this.contactDBS = contactDBS;
-        this.displayedList = this.contactDBS;
+        DiffUtilItemCallBack diffUtilItemCallBack = new DiffUtilItemCallBack();
+        differ = new AsyncListDiffer<>(this, diffUtilItemCallBack);
 
     }
 
@@ -47,31 +42,23 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-
-        contact = displayedList.get(position);
+        contact = differ.getCurrentList().get(position);
         holder.myTextView.setText(contact.getName());
     }
 
     // total number of rows
     @Override
     public int getItemCount() {
-        if (displayedList != null) {
-            return displayedList.size();
-        } else {
-            return 0;
-        }
+        return differ.getCurrentList().size();
+
     }
 
     public void setData(List<ContactDB> contactDBS) {
-        this.contactDBS = contactDBS;
-        this.displayedList = this.contactDBS;
+        differ.submitList(contactDBS);
     }
 
-    public void setResult(List<ContactDB> newList){
-        DiffUtilCallBack diffUtilCallBack = new DiffUtilCallBack(displayedList, newList);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffUtilCallBack);
-        adapter.displayedList = newList;
-        diffResult.dispatchUpdatesTo(adapter);
+    public void setResult(List<ContactDB> newList) {
+        differ.submitList(newList);
     }
 
     // parent activity will implement this method to respond to click events
@@ -96,9 +83,9 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         @Override
         public void onClick(View view) {
             int posit = getAdapterPosition();
-            ContactDB contact = adapter.displayedList.get(posit);
-            int ids = Integer.valueOf(contact.getIds());
             if (posit != RecyclerView.NO_POSITION) {
+                ContactDB contact = adapter.differ.getCurrentList().get(posit);
+                int ids = Integer.valueOf(contact.getIds());
                 onClickListener.onItemClick(ids);
             } else {
                 Log.i(LOG_TAG, "Get position no position");

@@ -10,24 +10,23 @@ import io.reactivex.schedulers.Schedulers;
 public class ContactModel {
 
     private static final String TAG = "model contact";
-    private List<Contact> contactList;
-    private List<ContactDB> contactDBList;
-    private Context context;
     private ReadContact readContact;
 
     ContactModel() {
+
     }
 
-    public void startReadContacts(Context context) {
-        readContact = new ReadContact(context);
+    public void startReadContacts() {
+        readContact = new ReadContact();
     }
 
-    Observable<List<ContactDB>> getFilteredContacts(String search){
-        if(search.isEmpty()){
-            return Observable.fromCallable(() -> ContactDB.listAll(ContactDB.class)).subscribeOn(Schedulers.io());
-        }
-        else {
-            return Observable.fromCallable(() -> ContactDB.findWithQuery(ContactDB.class,"Select * from CONTACT_DB where name LIKE ?", "%"+search+"%"))
+    Observable<List<ContactDB>> getFilteredContacts(String search) {
+        if (search.isEmpty()) {
+            return Observable.fromCallable(() -> ContactDB.listAll(ContactDB.class))
+                    .subscribeOn(Schedulers.io());
+        } else {
+            return Observable.fromCallable(() -> ContactDB
+                    .findWithQuery(ContactDB.class, "Select * from CONTACT_DB where name LIKE ?", "%" + search + "%"))
                     .subscribeOn(Schedulers.io());
 
         }
@@ -37,9 +36,10 @@ public class ContactModel {
         return Observable.fromCallable(() -> readContact.readContacts(context))
                 .concatMap(contacts -> {
                     saveDb(contacts);
-                    return Observable.fromCallable(() -> ContactDB.listAll(ContactDB.class)).subscribeOn(Schedulers.io());
+                    return Observable
+                            .fromCallable(() -> ContactDB.listAll(ContactDB.class));
                 })
-                .subscribeOn(Schedulers.computation());
+                .subscribeOn(Schedulers.io());
     }
 
     private void saveDb(List<Contact> list) {

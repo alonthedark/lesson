@@ -28,7 +28,6 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
     private int id;
 
 
-
     public ContactFragment() {
 
     }
@@ -42,15 +41,10 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
             Log.i(LOG_TAG, "getArgument is null");
         }
     }
-    @ProvidePresenter
-    ProfilePresenter provideMainPresenter(){
-        return new ProfilePresenter();
-    }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        presenter.detachView(this);
+    @ProvidePresenter
+    ProfilePresenter provideMainPresenter() {
+        return new ProfilePresenter();
     }
 
     @Override
@@ -65,7 +59,7 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
         return view;
     }
 
-    public void receiveOneContact(){
+    public void receiveOneContact() {
         presenter.receiveContact(id);
     }
 

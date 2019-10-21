@@ -8,10 +8,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
-
 class ReadContact {
     private static final String TAG = "ReadContact";
 
@@ -20,11 +16,9 @@ class ReadContact {
     private Cursor pCur;
     private Cursor emailCu;
     private int ids = 0;
-    Context context;
 
 
-    ReadContact(Context context) {
-        this.context = context;
+    ReadContact() {
         ContactDB.deleteAll(ContactDB.class);
     }
 

@@ -1,7 +1,6 @@
 package com.example.lesson;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -37,13 +36,10 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     private Context context;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     private ContactListAdapter adapter;
-    private List<ContactDB> contactDBList;
-    private List<Contact> contactList;
     private SearchView searchView;
-    private ProgressBar progressBar;
     private SearchManager searchManager;
+    private ProgressBar progressBar;
     private TextView loadContactInfo;
-    private Activity activity;
 
     public ContactListFragment() {
 
@@ -53,15 +49,13 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
-        adapter = new ContactListAdapter(context, this, contactDBList);
+        adapter = new ContactListAdapter(context, this);
         setHasOptionsMenu(true);
 
     }
 
     @ProvidePresenter
     MainPresenter provideMainPresenter() {
-        MainPresenter presenter = new MainPresenter();
-        context = getActivity();
         return new MainPresenter();
     }
 
@@ -81,8 +75,7 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
 
     public void setAdapter(List<ContactDB> contactDBS) {
         Log.d(TAG, "adapter");
-        this.contactDBList = contactDBS;
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(Objects.requireNonNull(getActivity()).getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -97,21 +90,23 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                 return false;
             }
         });
-        adapter.setData(contactDBList);
+        adapter.setData(contactDBS);
         recyclerView.addItemDecoration(new ItemDecoration(context, DividerItemDecoration.VERTICAL, 30));
         recyclerView.setAdapter(adapter);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mainPresenter.detachView(this);
-    }
 
     @Override
     public void onItemClick(int position) {
-        ((MainActivity) Objects.requireNonNull(getActivity())).onItemClick(position);
+        Bundle bundle = new Bundle();
+        bundle.putInt("position", position);
+        ContactFragment contactFragment = new ContactFragment();
+        contactFragment.setArguments(bundle);
+        Objects.requireNonNull(getActivity()).getSupportFragmentManager()
+                .beginTransaction().replace(R.id.frag, contactFragment).addToBackStack(null).commit();
+
     }
+
 
     public void permissionGranted() {
         if (ContextCompat.checkSelfPermission(context,
@@ -147,19 +142,19 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         }
     }
 
-    public void startProgress(){
+    public void startProgress() {
         progressBar.setVisibility(ProgressBar.VISIBLE);
         loadContactInfo.setVisibility(TextView.VISIBLE);
 
     }
 
-    public void hideProgress(){
+    public void hideProgress() {
         searchView.setVisibility(SearchView.VISIBLE);
         progressBar.setVisibility(ProgressBar.GONE);
         loadContactInfo.setVisibility(TextView.GONE);
     }
 
-    public void setNewData(List<ContactDB> contactDBList){
+    public void setNewData(List<ContactDB> contactDBList) {
         adapter.setResult(contactDBList);
     }
 }

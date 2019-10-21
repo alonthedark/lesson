@@ -11,7 +11,4 @@ public class ActivityPresenter extends MvpPresenter<ActivityView> {
         super.onFirstViewAttach();
         getViewState().attachContactList();
     }
-    public void replaceFragment(){
-        getViewState().attachContactFragment();
-    }
 }

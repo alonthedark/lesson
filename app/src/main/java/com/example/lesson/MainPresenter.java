@@ -14,7 +14,6 @@ public class MainPresenter extends MvpPresenter<ListView> {
     private static final String TAG = "MainPresenter";
     private ContactModel model;
     private Disposable disposable;
-    Context context;
 
     public MainPresenter() {
         this.model = new ContactModel();
@@ -27,8 +26,7 @@ public class MainPresenter extends MvpPresenter<ListView> {
     }
 
     public void readContacts(Context context) {
-        this.context = context;
-        model.startReadContacts(context);
+        model.startReadContacts();
         disposable = model.contactObservable(context)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(__ -> getViewState().startProgress())
@@ -36,8 +34,8 @@ public class MainPresenter extends MvpPresenter<ListView> {
                 .subscribe(contactDBS -> getViewState().setAdapter(contactDBS));
     }
 
-    public void searchContact(String search){
-        disposable =  model.getFilteredContacts(search).observeOn(AndroidSchedulers.mainThread())
+    public void searchContact(String search) {
+        disposable = model.getFilteredContacts(search).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(contactDBS -> getViewState().setNewData(contactDBS));
     }
 

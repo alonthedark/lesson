@@ -5,7 +5,6 @@ import java.util.List;
 
 import moxy.MvpView;
 import moxy.viewstate.strategy.AddToEndSingleStrategy;
-import moxy.viewstate.strategy.OneExecutionStateStrategy;
 import moxy.viewstate.strategy.SkipStrategy;
 import moxy.viewstate.strategy.StateStrategyType;
 
@@ -17,7 +16,7 @@ public interface ListView extends MvpView {
     @StateStrategyType(SkipStrategy.class)
     void permissionGranted();
 
-    @StateStrategyType(SkipStrategy.class)
+    @StateStrategyType(AddToEndSingleStrategy.class)
     void startProgress();
 
     @StateStrategyType(AddToEndSingleStrategy.class)

@@ -2,6 +2,9 @@ package com.example.lesson;
 
 import android.os.Bundle;
 
+import com.example.lesson.presenter.ActivityPresenter;
+import com.example.lesson.views.ActivityView;
+
 import androidx.fragment.app.FragmentManager;
 import moxy.MvpAppCompatActivity;
 import moxy.presenter.InjectPresenter;

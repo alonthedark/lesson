@@ -13,6 +13,9 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.example.lesson.presenter.MainPresenter;
+import com.example.lesson.views.ListView;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -113,7 +116,7 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
             Log.d(TAG, "Permission is granted");
-            mainPresenter.readContacts(context);
+            mainPresenter.readContacts(context.getApplicationContext());
 
         } else {
             // Разрешений нет
@@ -133,7 +136,7 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                 if (ContextCompat.checkSelfPermission(context,
                         Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                     // permission granted
-                    mainPresenter.readContacts(context);
+                    mainPresenter.readContacts(context.getApplicationContext());
                 } else {
                     // permission denied
                     Log.d(TAG, "Permission is not granted");
@@ -142,19 +145,19 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         }
     }
 
-    public void startProgress() {
+    public void startProgress(){
         progressBar.setVisibility(ProgressBar.VISIBLE);
         loadContactInfo.setVisibility(TextView.VISIBLE);
 
     }
 
-    public void hideProgress() {
+    public void hideProgress(){
         searchView.setVisibility(SearchView.VISIBLE);
         progressBar.setVisibility(ProgressBar.GONE);
         loadContactInfo.setVisibility(TextView.GONE);
     }
 
-    public void setNewData(List<ContactDB> contactDBList) {
+    public void setNewData(List<ContactDB> contactDBList){
         adapter.setResult(contactDBList);
     }
 }

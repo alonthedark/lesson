@@ -1,4 +1,6 @@
-package com.example.lesson;
+package com.example.lesson.presenter;
+
+import com.example.lesson.views.ActivityView;
 
 import moxy.InjectViewState;
 import moxy.MvpPresenter;

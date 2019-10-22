@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.lesson.presenter.ProfilePresenter;
+import com.example.lesson.views.ContactView;
+
 import moxy.MvpAppCompatFragment;
 import moxy.presenter.InjectPresenter;
 import moxy.presenter.ProvidePresenter;
@@ -37,6 +40,7 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             id = getArguments().getInt(KEY_POSITION);
+            presenter.setData(id);
         } else {
             Log.i(LOG_TAG, "getArgument is null");
         }
@@ -59,9 +63,6 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
         return view;
     }
 
-    public void receiveOneContact() {
-        presenter.receiveContact(id);
-    }
 
     @SuppressLint("SetTextI18n")
     public void setData(ContactDB contactDB) {

@@ -1,4 +1,4 @@
-package com.example.lesson;
+package com.example.lesson.views;
 
 import moxy.MvpView;
 import moxy.viewstate.strategy.OneExecutionStateStrategy;

@@ -12,7 +12,7 @@ public class ContactModel {
     private static final String TAG = "model contact";
     private ReadContact readContact;
 
-    ContactModel() {
+    public ContactModel() {
 
     }
 
@@ -20,19 +20,20 @@ public class ContactModel {
         readContact = new ReadContact();
     }
 
-    Observable<List<ContactDB>> getFilteredContacts(String search) {
-        if (search.isEmpty()) {
+    public Observable<List<ContactDB>> getFilteredContacts(String search){
+        if(search.isEmpty()){
             return Observable.fromCallable(() -> ContactDB.listAll(ContactDB.class))
                     .subscribeOn(Schedulers.io());
-        } else {
+        }
+        else {
             return Observable.fromCallable(() -> ContactDB
-                    .findWithQuery(ContactDB.class, "Select * from CONTACT_DB where name LIKE ?", "%" + search + "%"))
+                    .findWithQuery(ContactDB.class,"Select * from CONTACT_DB where name LIKE ?", "%"+search+"%"))
                     .subscribeOn(Schedulers.io());
 
         }
     }
 
-    Observable<List<ContactDB>> contactObservable(Context context) {
+    public Observable<List<ContactDB>> contactObservable(Context context) {
         return Observable.fromCallable(() -> readContact.readContacts(context))
                 .concatMap(contacts -> {
                     saveDb(contacts);

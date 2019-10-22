@@ -1,6 +1,9 @@
-package com.example.lesson;
+package com.example.lesson.presenter;
 
 import android.content.Context;
+
+import com.example.lesson.ContactModel;
+import com.example.lesson.views.ListView;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;

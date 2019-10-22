@@ -1,5 +1,7 @@
-package com.example.lesson;
+package com.example.lesson.views;
 
+
+import com.example.lesson.ContactDB;
 
 import java.util.List;
 

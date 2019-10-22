@@ -1,4 +1,7 @@
-package com.example.lesson;
+package com.example.lesson.presenter;
+
+import com.example.lesson.views.ContactView;
+import com.example.lesson.ModelDetail;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -10,21 +13,22 @@ public class ProfilePresenter extends MvpPresenter<ContactView> {
 
     private ModelDetail model;
     private Disposable disposable;
+    private int id;
 
-    ProfilePresenter() {
+    public ProfilePresenter() {
 
     }
 
-    public void receiveContact(int id) {
-        disposable = model.getContact(id).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(contactDB1 -> getViewState().setData(contactDB1.get(0)));
+    public void setData(int id) {
+        this.id = id;
     }
 
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
         model = new ModelDetail();
-        getViewState().receiveOneContact();
+        disposable = model.getContact(id).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(contactDB -> getViewState().setData(contactDB));
     }
 
     @Override

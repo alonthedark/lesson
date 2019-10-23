@@ -20,14 +20,13 @@ public class ContactModel {
         readContact = new ReadContact();
     }
 
-    public Observable<List<ContactDB>> getFilteredContacts(String search){
-        if(search.isEmpty()){
+    public Observable<List<ContactDB>> getFilteredContacts(String search) {
+        if (search.isEmpty()) {
             return Observable.fromCallable(() -> ContactDB.listAll(ContactDB.class))
                     .subscribeOn(Schedulers.io());
-        }
-        else {
+        } else {
             return Observable.fromCallable(() -> ContactDB
-                    .findWithQuery(ContactDB.class,"Select * from CONTACT_DB where name LIKE ?", "%"+search+"%"))
+                    .findWithQuery(ContactDB.class, "Select * from CONTACT_DB where name LIKE ?", "%" + search + "%"))
                     .subscribeOn(Schedulers.io());
 
         }

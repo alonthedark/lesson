@@ -145,19 +145,19 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         }
     }
 
-    public void startProgress(){
+    public void startProgress() {
         progressBar.setVisibility(ProgressBar.VISIBLE);
         loadContactInfo.setVisibility(TextView.VISIBLE);
 
     }
 
-    public void hideProgress(){
+    public void hideProgress() {
         searchView.setVisibility(SearchView.VISIBLE);
         progressBar.setVisibility(ProgressBar.GONE);
         loadContactInfo.setVisibility(TextView.GONE);
     }
 
-    public void setNewData(List<ContactDB> contactDBList){
+    public void setNewData(List<ContactDB> contactDBList) {
         adapter.setResult(contactDBList);
     }
 }

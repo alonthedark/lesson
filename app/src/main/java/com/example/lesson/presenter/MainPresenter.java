@@ -38,8 +38,12 @@ public class MainPresenter extends MvpPresenter<ListView> {
     }
 
     public void searchContact(String search) {
+        if (!disposable.isDisposed()) {
+            disposable.dispose();
+        }
         disposable = model.getFilteredContacts(search).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(contactDBS -> getViewState().setNewData(contactDBS));
+
     }
 
     @Override

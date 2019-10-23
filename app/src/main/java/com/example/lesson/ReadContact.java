@@ -18,7 +18,6 @@ class ReadContact {
     private int ids = 0;
 
 
-
     ReadContact() {
         ContactDB.deleteAll(ContactDB.class);
     }

@@ -10,7 +10,6 @@ public class ContactDB extends SugarRecord<ContactDB> {
     private String email;
 
 
-
     public ContactDB() {
     }
 
@@ -21,19 +20,30 @@ public class ContactDB extends SugarRecord<ContactDB> {
         this.email = email;
     }
 
-    public String getName() { return name; }
-    public String getPhone(){ return phone; }
-    public String getIds(){return ids;}
-    public String getEmail(){return email;}
+    public String getName() {
+        return name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getIds() {
+        return ids;
+    }
+
+    public String getEmail() {
+        return email;
+    }
 
 
     @Override
     public String toString() {
         return "ContactDB{" +
                 "name='" + name + '\'' +
-                "phone='" + phone +'\'' +
-                "ids='" + ids +'\'' +
-                "email='" + email +'\'' +
+                "phone='" + phone + '\'' +
+                "ids='" + ids + '\'' +
+                "email='" + email + '\'' +
                 '}';
     }
 }

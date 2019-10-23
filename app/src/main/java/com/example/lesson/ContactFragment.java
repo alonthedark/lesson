@@ -40,7 +40,7 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             id = getArguments().getInt(KEY_POSITION);
-            presenter.setData(id);
+            presenter.receiveContact(id);
         } else {
             Log.i(LOG_TAG, "getArgument is null");
         }

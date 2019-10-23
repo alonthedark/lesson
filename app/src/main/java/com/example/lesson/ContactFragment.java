@@ -38,22 +38,16 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @ProvidePresenter
+    ProfilePresenter provideMainPresenter() {
         if (getArguments() != null) {
             id = getArguments().getInt(KEY_POSITION);
         } else {
             Log.i(LOG_TAG, "getArgument is null");
         }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        presenter.receiveContact(id);
-    }
-
-    @ProvidePresenter
-    ProfilePresenter provideMainPresenter() {
-        return new ProfilePresenter();
+        return new ProfilePresenter(id);
     }
 
     @Override

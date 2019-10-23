@@ -13,20 +13,20 @@ public class ProfilePresenter extends MvpPresenter<ContactView> {
 
     private ModelDetail model;
     private Disposable disposable;
+    private int id;
 
-    public ProfilePresenter() {
+    public ProfilePresenter(int id) {
+        model = new ModelDetail();
+        this.id = id;
 
-    }
-
-    public void receiveContact(int id) {
-        disposable = model.getContact(id).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(contactDB -> getViewState().setData(contactDB));
     }
 
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
-        model = new ModelDetail();
+        disposable = model.getContact(id).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(contactDB -> getViewState().setData(contactDB));
+
     }
 
     @Override

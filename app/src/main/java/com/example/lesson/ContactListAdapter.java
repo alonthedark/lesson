@@ -16,16 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.ViewHolder> {
 
     private static final String LOG_TAG = "Adapter";
-    private LayoutInflater mInflater;
-    private OnClickListener mOnClickListner;
-    private ContactDB contact;
-    private ContactListAdapter adapter = this;
-    AsyncListDiffer<ContactDB> differ;
+    private LayoutInflater inflater;
+    private OnClickListener onClickListener;
+    private final AsyncListDiffer<ContactDB> differ;
 
     // data is passed into the constructor
     ContactListAdapter(Context context, OnClickListener onClickListener) {
-        this.mInflater = LayoutInflater.from(context);
-        this.mOnClickListner = onClickListener;
+        this.inflater = LayoutInflater.from(context);
+        this.onClickListener = onClickListener;
         DiffUtilItemCallBack diffUtilItemCallBack = new DiffUtilItemCallBack();
         differ = new AsyncListDiffer<>(this, diffUtilItemCallBack);
 
@@ -35,15 +33,15 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.recyclerview_row, parent, false);
-        return new ViewHolder(view, mOnClickListner, this);
+        View view = inflater.inflate(R.layout.recyclerview_row, parent, false);
+        return new ViewHolder(view, onClickListener, this);
     }
 
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        contact = differ.getCurrentList().get(position);
-        holder.myTextView.setText(contact.getName());
+        ContactDB contact = differ.getCurrentList().get(position);
+        holder.bind(contact);
     }
 
     // total number of rows
@@ -57,20 +55,16 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         differ.submitList(contactDBS);
     }
 
-    public void setResult(List<ContactDB> newList) {
-        differ.submitList(newList);
-    }
-
     // parent activity will implement this method to respond to click events
     public interface OnClickListener {
-        void onItemClick(int position);
+        void onItemClick(int id);
     }
 
     // stores and recycles views as they are scrolled off screen
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView myTextView;
-        OnClickListener onClickListener;
-        ContactListAdapter adapter;
+        private TextView myTextView;
+        private final OnClickListener onClickListener;
+        private final ContactListAdapter adapter;
 
         ViewHolder(View itemView, OnClickListener onClickListener, ContactListAdapter adapter) {
             super(itemView);
@@ -78,6 +72,10 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
             myTextView = itemView.findViewById(R.id.name);
             this.onClickListener = onClickListener;
             itemView.setOnClickListener(this);
+        }
+
+        public void bind(ContactDB contactDB){
+            myTextView.setText(contactDB.getName());
         }
 
         @Override

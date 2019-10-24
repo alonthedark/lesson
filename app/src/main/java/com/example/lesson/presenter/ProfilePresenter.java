@@ -13,12 +13,11 @@ public class ProfilePresenter extends MvpPresenter<ContactView> {
 
     private ModelDetail model;
     private Disposable disposable;
-    private int id;
+    private final int id;
 
     public ProfilePresenter(int id) {
         model = new ModelDetail();
         this.id = id;
-
     }
 
     @Override

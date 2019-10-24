@@ -21,9 +21,8 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
     @InjectPresenter
     ProfilePresenter presenter;
 
-    private ContactDB contactDBS;
     private static final String LOG_TAG = "ContactFragment";
-    private static final String KEY_POSITION = "position";
+    private static final String KEY_POSITION = "id";
     private ImageView avatar;
     private TextView name;
     private TextView phone;
@@ -65,10 +64,9 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
 
     @SuppressLint("SetTextI18n")
     public void setData(ContactDB contactDB) {
-        contactDBS = contactDB;
-        String nameText = contactDBS.getName();
-        String phoneNumber = contactDBS.getPhone();
-        String emailData = contactDBS.getEmail();
+        String nameText = contactDB.getName();
+        String phoneNumber = contactDB.getPhone();
+        String emailData = contactDB.getEmail();
         name.setText("Имя " + nameText);
         phone.setText("Телефон " + phoneNumber);
         email.setText("Email " + emailData);

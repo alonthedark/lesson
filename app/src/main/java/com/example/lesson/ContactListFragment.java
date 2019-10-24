@@ -100,9 +100,9 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
 
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(int id) {
         Bundle bundle = new Bundle();
-        bundle.putInt("position", position);
+        bundle.putInt("id", id);
         ContactFragment contactFragment = new ContactFragment();
         contactFragment.setArguments(bundle);
         Objects.requireNonNull(getActivity()).getSupportFragmentManager()
@@ -148,7 +148,6 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     public void startProgress() {
         progressBar.setVisibility(ProgressBar.VISIBLE);
         loadContactInfo.setVisibility(TextView.VISIBLE);
-
     }
 
     public void hideProgress() {
@@ -158,6 +157,6 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     }
 
     public void setNewData(List<ContactDB> contactDBList) {
-        adapter.setResult(contactDBList);
+        adapter.setData(contactDBList);
     }
 }

@@ -25,7 +25,7 @@ public class MainPresenter extends MvpPresenter<ListView> {
     @Override
     protected void onFirstViewAttach() {
         super.onFirstViewAttach();
-        getViewState().permissionGranted();
+        getViewState().requestPermission();
     }
 
     public void readContacts(Context context) {
@@ -34,14 +34,12 @@ public class MainPresenter extends MvpPresenter<ListView> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(__ -> getViewState().startProgress())
                 .doOnTerminate(() -> getViewState().hideProgress())
-                .subscribe(contactDBS -> getViewState().setAdapter(contactDBS));
+                .subscribe(contactDBS -> getViewState().setNewData(contactDBS));
     }
 
     public void searchContact(String search) {
-        if(disposable != null){
-            if (!disposable.isDisposed()) {
+        if(disposable != null && !disposable.isDisposed()){
                 disposable.dispose();
-            }
         }
         disposable = model.getFilteredContacts(search).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(contactDBS -> getViewState().setNewData(contactDBS));

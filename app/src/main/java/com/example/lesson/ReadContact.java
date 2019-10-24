@@ -11,7 +11,7 @@ import java.util.List;
 class ReadContact {
     private static final String TAG = "ReadContact";
 
-    private List<Contact> contacts = new ArrayList<>();
+    private final List<Contact> contacts = new ArrayList<>();
     private Cursor cursor;
     private Cursor pCur;
     private Cursor emailCu;

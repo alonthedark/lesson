@@ -30,10 +30,6 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
     private int id;
 
 
-    public ContactFragment() {
-
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +59,7 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
 
 
     @SuppressLint("SetTextI18n")
+    @Override
     public void setData(ContactDB contactDB) {
         String nameText = contactDB.getName();
         String phoneNumber = contactDB.getPhone();

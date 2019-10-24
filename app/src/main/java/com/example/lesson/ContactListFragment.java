@@ -34,19 +34,13 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     @InjectPresenter
     MainPresenter mainPresenter;
 
-    private RecyclerView recyclerView;
     private static final String TAG = "contact list";
     private Context context;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     private ContactListAdapter adapter;
     private SearchView searchView;
-    private SearchManager searchManager;
     private ProgressBar progressBar;
     private TextView loadContactInfo;
-
-    public ContactListFragment() {
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,19 +60,15 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.contact_list, container, false);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         loadContactInfo = (TextView) view.findViewById(R.id.loadContactInfo);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
-        searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        SearchManager searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) view.findViewById(R.id.contact_search);
-        return view;
-    }
-
-    public void setAdapter(List<ContactDB> contactDBS) {
-        Log.d(TAG, "adapter");
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(Objects.requireNonNull(getActivity()).getComponentName()));
+        searchView.setSearchableInfo(Objects.requireNonNull(searchManager)
+                .getSearchableInfo(Objects.requireNonNull(getActivity()).getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -93,11 +83,11 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                 return false;
             }
         });
-        adapter.setData(contactDBS);
+
         recyclerView.addItemDecoration(new ItemDecoration(context, DividerItemDecoration.VERTICAL, 30));
         recyclerView.setAdapter(adapter);
+        return view;
     }
-
 
     @Override
     public void onItemClick(int id) {
@@ -107,11 +97,10 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
         contactFragment.setArguments(bundle);
         Objects.requireNonNull(getActivity()).getSupportFragmentManager()
                 .beginTransaction().replace(R.id.frag, contactFragment).addToBackStack(null).commit();
-
     }
 
-
-    public void permissionGranted() {
+    @Override
+    public void requestPermission() {
         if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
@@ -144,18 +133,20 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                 break;
         }
     }
-
+    @Override
     public void startProgress() {
         progressBar.setVisibility(ProgressBar.VISIBLE);
         loadContactInfo.setVisibility(TextView.VISIBLE);
     }
 
+    @Override
     public void hideProgress() {
         searchView.setVisibility(SearchView.VISIBLE);
         progressBar.setVisibility(ProgressBar.GONE);
         loadContactInfo.setVisibility(TextView.GONE);
     }
 
+    @Override
     public void setNewData(List<ContactDB> contactDBList) {
         adapter.setData(contactDBList);
     }

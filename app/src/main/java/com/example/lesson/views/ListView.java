@@ -12,11 +12,8 @@ import moxy.viewstate.strategy.StateStrategyType;
 
 public interface ListView extends MvpView {
 
-    @StateStrategyType(AddToEndSingleStrategy.class)
-    void setAdapter(List<ContactDB> contactDBS);
-
     @StateStrategyType(SkipStrategy.class)
-    void permissionGranted();
+    void requestPermission();
 
     @StateStrategyType(AddToEndSingleStrategy.class)
     void startProgress();

@@ -16,8 +16,6 @@ public class MainActivity extends MvpAppCompatActivity implements ActivityView {
     @InjectPresenter
     ActivityPresenter activityPresenter;
 
-    ContactListFragment contactListFragment;
-    FragmentManager fragmentManager = getSupportFragmentManager();
     private static final String TAG = "MainActivity";
 
     @ProvidePresenter
@@ -32,8 +30,9 @@ public class MainActivity extends MvpAppCompatActivity implements ActivityView {
     }
 
 
+    @Override
     public void attachContactList() {
-        contactListFragment = new ContactListFragment();
-        fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).commit();
+        ContactListFragment contactListFragment = new ContactListFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
 }

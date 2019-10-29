@@ -1,0 +1,53 @@
+package com.example.lesson.presenter;
+
+import android.content.Context;
+
+import com.example.lesson.ContactModel;
+import com.example.lesson.views.ListView;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import moxy.InjectViewState;
+import moxy.MvpPresenter;
+
+@InjectViewState
+public class MainPresenter extends MvpPresenter<ListView> {
+
+
+    private static final String TAG = "MainPresenter";
+    private ContactModel model;
+    private Disposable disposable;
+
+    public MainPresenter() {
+        this.model = new ContactModel();
+    }
+
+    @Override
+    protected void onFirstViewAttach() {
+        super.onFirstViewAttach();
+        getViewState().requestPermission();
+    }
+
+    public void readContacts() {
+        model.startReadContacts();
+        disposable = model.contactObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(__ -> getViewState().startProgress())
+                .doOnTerminate(() -> getViewState().hideProgress())
+                .subscribe(contactDBS -> getViewState().setNewData(contactDBS));
+    }
+
+    public void searchContact(String search) {
+        if(disposable != null && !disposable.isDisposed()){
+                disposable.dispose();
+        }
+        disposable = model.getFilteredContacts(search).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(contactDBS -> getViewState().setNewData(contactDBS));
+    }
+
+    @Override
+    public void onDestroy() {
+        disposable.dispose();
+    }
+
+}

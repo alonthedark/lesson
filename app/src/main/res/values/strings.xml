@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">lesson</string>
+    <string name="load">загрузка контактов</string>
 </resources>

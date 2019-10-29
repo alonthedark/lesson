@@ -1,32 +1,33 @@
 package com.example.lesson;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.example.lesson.di.AppDelegate;
+
 import java.util.ArrayList;
 import java.util.List;
 
-class ReadContact {
-    private static final String TAG = "Permission contact";
+import javax.inject.Inject;
 
-    private List<Contact> contacts = new ArrayList<>();
+public class ReadContact {
+    private static final String TAG = "ReadContact";
+    private final List<Contact> contacts = new ArrayList<>();
     private Cursor cursor;
     private Cursor pCur;
     private Cursor emailCu;
-    private ContactListFragment contactListFragment;
     private int ids = 0;
 
+    @Inject
+    Context context;
 
-    ReadContact(ContactListFragment contactListFragment) {
-        this.contactListFragment = contactListFragment;
-        ContactDB.deleteAll(ContactDB.class);
+    public ReadContact(){
+        AppDelegate.getAppComponent().inject(this);
     }
 
-
-    void readContacts(Context context) {
+    List<Contact> readContacts() {
         Contact contact;
 
         try {
@@ -94,17 +95,6 @@ class ReadContact {
                 pCur.close();
             }
         }
-
-        for (int i = 0; i < contacts.size(); i++) {
-            ContactDB contactDB = new ContactDB(
-                    contacts.get(i).getName(),
-                    contacts.get(i).getPhone(),
-                    contacts.get(i).getIds(),
-                    contacts.get(i).getEmail());
-            contactDB.save();
-        }
-        contactListFragment.handler.sendEmptyMessage(ContactListFragment.CONTACT_READ);
+        return contacts;
     }
-
 }
-

@@ -1,41 +1,46 @@
 package com.example.lesson;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
+import com.example.lesson.di.AppDelegate;
+import com.example.lesson.di.AppModule;
+import com.example.lesson.presenter.ActivityPresenter;
+import com.example.lesson.views.ActivityView;
 
-public class MainActivity extends FragmentActivity implements ContactListAdapter.OnClickListner {
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-    ContactListFragment contactListFragment;
-    ContactFragment contactFragment;
-    FragmentManager fragmentManager = getSupportFragmentManager();
+import moxy.MvpAppCompatActivity;
+import moxy.presenter.InjectPresenter;
+import moxy.presenter.ProvidePresenter;
+
+
+public class MainActivity extends MvpAppCompatActivity implements ActivityView {
+
+    @InjectPresenter
+    ActivityPresenter activityPresenter;
+
+
+
+
     private static final String TAG = "MainActivity";
+
+    @ProvidePresenter
+    ActivityPresenter provideActivityPresenter() {
+        return new ActivityPresenter();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            startTransaction();
-        }
-    }
-
-    private void startTransaction() {
-        contactListFragment = new ContactListFragment();
-        fragmentManager.beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
 
 
     @Override
-    public void onItemClick(int position) {
-        Bundle bundle = new Bundle();
-        bundle.putInt("position", position);
-        contactFragment = new ContactFragment();
-        contactFragment.setArguments(bundle);
-        fragmentManager.beginTransaction().replace(R.id.frag, contactFragment).addToBackStack(null).commit();
-        Log.d(TAG, "CLICK " + position);
+    public void attachContactList() {
+        ContactListFragment contactListFragment = new ContactListFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.frag, contactListFragment).commit();
     }
 }
-

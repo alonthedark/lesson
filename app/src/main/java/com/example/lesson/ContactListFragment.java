@@ -1,78 +1,124 @@
 package com.example.lesson;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
+import android.widget.TextView;
 
-import java.lang.ref.WeakReference;
+import com.example.lesson.database.ContactsDB;
+import com.example.lesson.di.AppDelegate;
+import com.example.lesson.presenter.MainPresenter;
+import com.example.lesson.views.ListView;
+
 import java.util.List;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ContactListFragment extends Fragment implements ContactListAdapter.OnClickListner {
+import javax.inject.Inject;
 
-    Handler handler;
-    private ContactListFragment contactListFragment = this;
-    final static int CONTACT_READ = 0;
-    private final static int DB_READ = 1;
+import moxy.MvpAppCompatFragment;
+import moxy.presenter.InjectPresenter;
+import moxy.presenter.ProvidePresenter;
+
+public class ContactListFragment extends MvpAppCompatFragment implements ListView, ContactListAdapter.OnClickListener {
+
+
+    @InjectPresenter
+    MainPresenter mainPresenter;
+
+    @Inject
+    Context context;
+
+    private static final String TAG = "contact list";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
-    private static final String TAG = "ContactList";
-    private List<ContactDB> contactDBList;
-    private Context context;
-    private RecyclerView recyclerView;
-    private Thread thContactReceive;
-    private Thread trReadDb;
     private ContactListAdapter adapter;
-
-    public ContactListFragment() {
-
-    }
+    private SearchView searchView;
+    private ProgressBar progressBar;
+    private TextView loadContactInfo;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getActivity();
-        handler = new IncomingHandler(contactListFragment);
+        AppDelegate.getAppComponent().inject(this);
+        adapter = new ContactListAdapter(context, this);
+        setHasOptionsMenu(true);
+    }
 
+    @ProvidePresenter
+    MainPresenter provideMainPresenter() {
+        return new MainPresenter();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.contact_list, container, false);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
+        loadContactInfo = (TextView) view.findViewById(R.id.loadContactInfo);
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setClickable(true);
-        permissionGranted();
+        SearchManager searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) view.findViewById(R.id.contact_search);
+        searchView.setSearchableInfo(Objects.requireNonNull(searchManager)
+                .getSearchableInfo(Objects.requireNonNull(getActivity()).getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mainPresenter.searchContact(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                mainPresenter.searchContact(query);
+                return false;
+            }
+        });
+
+        recyclerView.addItemDecoration(new ItemDecoration(context, DividerItemDecoration.VERTICAL, 30));
+        recyclerView.setAdapter(adapter);
         return view;
     }
 
-    private void permissionGranted() {
+    @Override
+    public void onItemClick(int id) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("id", id);
+        ContactFragment contactFragment = new ContactFragment();
+        contactFragment.setArguments(bundle);
+        Objects.requireNonNull(getActivity()).getSupportFragmentManager()
+                .beginTransaction().replace(R.id.frag, contactFragment).addToBackStack(null).commit();
+    }
+
+    @Override
+    public void requestPermission() {
         if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
             Log.d(TAG, "Permission is granted");
-            thContactReceive = new Thread(new ContactReceive(contactListFragment));
-            thContactReceive.start();
+            mainPresenter.readContacts();
+
         } else {
             // Разрешений нет
             Log.d(TAG, "Permission is not granted");
 
             // Запрос разрешений
             Log.d(TAG, "Request permissions");
-
             requestPermissions(new String[]{
                     Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_READ_CONTACTS);
         }
@@ -85,100 +131,29 @@ public class ContactListFragment extends Fragment implements ContactListAdapter.
                 if (ContextCompat.checkSelfPermission(context,
                         Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                     // permission granted
-                    thContactReceive = new Thread(new ContactReceive(contactListFragment));
-                    thContactReceive.start();
+                    mainPresenter.readContacts();
                 } else {
                     // permission denied
                     Log.d(TAG, "Permission is not granted");
                 }
+                break;
         }
+    }
+    @Override
+    public void startProgress() {
+        progressBar.setVisibility(View.VISIBLE);
+        loadContactInfo.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void onItemClick(int position) {
-        ((MainActivity) Objects.requireNonNull(getActivity())).onItemClick(position);
-    }
-
-    private void setAdapter(RecyclerView recycler, List<ContactDB> contactDBS) {
-        Log.d(TAG, "adapter");
-        adapter = new ContactListAdapter(context, this, contactDBS);
-        recycler.setAdapter(adapter);
+    public void hideProgress() {
+        searchView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+        loadContactInfo.setVisibility(View.GONE);
     }
 
     @Override
-    public void onDestroy() {
-        handler.removeCallbacksAndMessages(null);
-        super.onDestroy();
-        if(thContactReceive !=null) {
-            thContactReceive.interrupt();
-        }
-        if(trReadDb != null) {
-            trReadDb.interrupt();
-        }
-    }
-
-    static class ContactReceive implements Runnable {
-
-        WeakReference<ContactListFragment> weakReference;
-
-        ContactReceive(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference<>(contactListFragment);
-        }
-
-        @Override
-        public void run() {
-            if (!Thread.interrupted()) {
-                ContactListFragment fragment = weakReference.get();
-                if (fragment != null) {
-                    ReadContact readContact = new ReadContact(fragment.contactListFragment);
-                    readContact.readContacts(fragment.context);
-                }
-            }
-        }
-    }
-
-    static class ReadContactDb implements Runnable {
-
-        WeakReference<ContactListFragment> weakReference;
-
-        ReadContactDb(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference<>(contactListFragment);
-        }
-
-        @Override
-        public void run() {
-            if (!Thread.interrupted()) {
-                ContactListFragment fragment = weakReference.get();
-                if (fragment != null) {
-                    fragment.contactDBList = ContactDB.listAll(ContactDB.class);
-                    fragment.handler.sendEmptyMessage(DB_READ);
-                }
-            }
-        }
-    }
-
-    static class IncomingHandler extends Handler {
-
-        WeakReference<ContactListFragment> weakReference;
-
-        IncomingHandler(ContactListFragment contactListFragment) {
-            weakReference = new WeakReference<>(contactListFragment);
-        }
-
-        public void handleMessage(@NonNull Message msg) {
-
-            ContactListFragment fragment = weakReference.get();
-            if (fragment != null) {
-                switch (msg.what) {
-                    case CONTACT_READ:
-                        fragment.trReadDb = new Thread(new ReadContactDb(fragment));
-                        fragment.trReadDb.start();
-                        break;
-                    case DB_READ:
-                        fragment.setAdapter(fragment.recyclerView, fragment.contactDBList);
-                        break;
-                }
-            }
-        }
+    public void setNewData(List<ContactsDB> contactDBList) {
+        adapter.setData(contactDBList);
     }
 }

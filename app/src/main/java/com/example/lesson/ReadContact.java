@@ -5,24 +5,29 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.example.lesson.di.AppDelegate;
+
 import java.util.ArrayList;
 import java.util.List;
 
-class ReadContact {
-    private static final String TAG = "ReadContact";
+import javax.inject.Inject;
 
+public class ReadContact {
+    private static final String TAG = "ReadContact";
     private final List<Contact> contacts = new ArrayList<>();
     private Cursor cursor;
     private Cursor pCur;
     private Cursor emailCu;
     private int ids = 0;
 
+    @Inject
+    Context context;
 
-    ReadContact() {
-        ContactDB.deleteAll(ContactDB.class);
+    public ReadContact(){
+        AppDelegate.getAppComponent().inject(this);
     }
 
-    List<Contact> readContacts(Context context) {
+    List<Contact> readContacts() {
         Contact contact;
 
         try {

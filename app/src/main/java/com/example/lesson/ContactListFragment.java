@@ -13,6 +13,8 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.example.lesson.database.ContactsDB;
+import com.example.lesson.di.AppDelegate;
 import com.example.lesson.presenter.MainPresenter;
 import com.example.lesson.views.ListView;
 
@@ -24,6 +26,9 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import javax.inject.Inject;
+
 import moxy.MvpAppCompatFragment;
 import moxy.presenter.InjectPresenter;
 import moxy.presenter.ProvidePresenter;
@@ -34,8 +39,10 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     @InjectPresenter
     MainPresenter mainPresenter;
 
+    @Inject
+    Context context;
+
     private static final String TAG = "contact list";
-    private Context context;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 10;
     private ContactListAdapter adapter;
     private SearchView searchView;
@@ -45,10 +52,9 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getActivity();
+        AppDelegate.getAppComponent().inject(this);
         adapter = new ContactListAdapter(context, this);
         setHasOptionsMenu(true);
-
     }
 
     @ProvidePresenter
@@ -105,7 +111,7 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                 Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             // Разрешения чтения контактов имеются
             Log.d(TAG, "Permission is granted");
-            mainPresenter.readContacts(context.getApplicationContext());
+            mainPresenter.readContacts();
 
         } else {
             // Разрешений нет
@@ -125,7 +131,7 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
                 if (ContextCompat.checkSelfPermission(context,
                         Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                     // permission granted
-                    mainPresenter.readContacts(context.getApplicationContext());
+                    mainPresenter.readContacts();
                 } else {
                     // permission denied
                     Log.d(TAG, "Permission is not granted");
@@ -135,19 +141,19 @@ public class ContactListFragment extends MvpAppCompatFragment implements ListVie
     }
     @Override
     public void startProgress() {
-        progressBar.setVisibility(ProgressBar.VISIBLE);
-        loadContactInfo.setVisibility(TextView.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        loadContactInfo.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideProgress() {
-        searchView.setVisibility(SearchView.VISIBLE);
-        progressBar.setVisibility(ProgressBar.GONE);
-        loadContactInfo.setVisibility(TextView.GONE);
+        searchView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+        loadContactInfo.setVisibility(View.GONE);
     }
 
     @Override
-    public void setNewData(List<ContactDB> contactDBList) {
+    public void setNewData(List<ContactsDB> contactDBList) {
         adapter.setData(contactDBList);
     }
 }

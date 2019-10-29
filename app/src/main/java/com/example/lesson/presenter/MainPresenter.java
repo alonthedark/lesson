@@ -28,9 +28,9 @@ public class MainPresenter extends MvpPresenter<ListView> {
         getViewState().requestPermission();
     }
 
-    public void readContacts(Context context) {
+    public void readContacts() {
         model.startReadContacts();
-        disposable = model.contactObservable(context)
+        disposable = model.contactObservable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(__ -> getViewState().startProgress())
                 .doOnTerminate(() -> getViewState().hideProgress())

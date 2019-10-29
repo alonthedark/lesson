@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.lesson.database.ContactsDB;
 import com.example.lesson.presenter.ProfilePresenter;
 import com.example.lesson.views.ContactView;
 
@@ -60,7 +61,7 @@ public class ContactFragment extends MvpAppCompatFragment implements ContactView
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void setData(ContactDB contactDB) {
+    public void setData(ContactsDB contactDB) {
         String nameText = contactDB.getName();
         String phoneNumber = contactDB.getPhone();
         String emailData = contactDB.getEmail();

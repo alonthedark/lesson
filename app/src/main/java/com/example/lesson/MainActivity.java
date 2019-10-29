@@ -1,11 +1,16 @@
 package com.example.lesson;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import com.example.lesson.di.AppDelegate;
+import com.example.lesson.di.AppModule;
 import com.example.lesson.presenter.ActivityPresenter;
 import com.example.lesson.views.ActivityView;
 
-import androidx.fragment.app.FragmentManager;
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import moxy.MvpAppCompatActivity;
 import moxy.presenter.InjectPresenter;
 import moxy.presenter.ProvidePresenter;
@@ -15,6 +20,9 @@ public class MainActivity extends MvpAppCompatActivity implements ActivityView {
 
     @InjectPresenter
     ActivityPresenter activityPresenter;
+
+
+
 
     private static final String TAG = "MainActivity";
 

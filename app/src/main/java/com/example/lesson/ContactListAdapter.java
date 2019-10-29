@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.lesson.database.ContactsDB;
+
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -18,7 +20,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     private static final String LOG_TAG = "Adapter";
     private LayoutInflater inflater;
     private OnClickListener onClickListener;
-    private final AsyncListDiffer<ContactDB> differ;
+    private final AsyncListDiffer<ContactsDB> differ;
 
     // data is passed into the constructor
     ContactListAdapter(Context context, OnClickListener onClickListener) {
@@ -40,7 +42,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
     // binds the data to the TextView in each row
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ContactDB contact = differ.getCurrentList().get(position);
+        ContactsDB contact = differ.getCurrentList().get(position);
         holder.bind(contact);
     }
 
@@ -51,7 +53,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
 
     }
 
-    public void setData(List<ContactDB> contactDBS) {
+    public void setData(List<ContactsDB> contactDBS) {
         differ.submitList(contactDBS);
     }
 
@@ -74,7 +76,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
             itemView.setOnClickListener(this);
         }
 
-        public void bind(ContactDB contactDB){
+        public void bind(ContactsDB contactDB){
             myTextView.setText(contactDB.getName());
         }
 
@@ -82,7 +84,7 @@ public class ContactListAdapter extends RecyclerView.Adapter<ContactListAdapter.
         public void onClick(View view) {
             int posit = getAdapterPosition();
             if (posit != RecyclerView.NO_POSITION) {
-                ContactDB contact = adapter.differ.getCurrentList().get(posit);
+                ContactsDB contact = adapter.differ.getCurrentList().get(posit);
                 int ids = Integer.valueOf(contact.getIds());
                 onClickListener.onItemClick(ids);
             } else {

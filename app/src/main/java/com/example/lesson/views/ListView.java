@@ -1,7 +1,7 @@
 package com.example.lesson.views;
 
 
-import com.example.lesson.ContactDB;
+import com.example.lesson.database.ContactsDB;
 
 import java.util.List;
 
@@ -22,5 +22,5 @@ public interface ListView extends MvpView {
     void hideProgress();
 
     @StateStrategyType(AddToEndSingleStrategy.class)
-    void setNewData(List<ContactDB> contactDBList);
+    void setNewData(List<ContactsDB> contactDBList);
 }
